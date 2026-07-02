@@ -1,15 +1,5 @@
 import React from 'react'
 import { Container, Row, Col, Jumbotron } from 'react-bootstrap'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import {
-  faLinkedinIn,
-  faTwitter,
-  faGithub,
-  faMediumM,
-  faGoogle,
-  faResearchgate,
-  faOrcid
-} from '@fortawesome/free-brands-svg-icons'
 
 function About() {
   return (
@@ -20,31 +10,24 @@ function About() {
             <Row>
               <Col md={4} xs={12}>
                 <div style={{ display: 'block' }}>
-                  <img className='portrait' src='./assets/Zichen_Wang_1x1.jpg' alt='Zichen Wang' />
-                  <h3 className='text-center'>Zichen Wang, PhD</h3>
-                  <h4 className='text-center'>Sr Applied Scientist @ Amazon</h4>
-                  <ul className='social-links text-center'>
-                    <li><a target='_blank' rel='noopener noreferrer' href='https://twitter.com/ZichenWangPhD' title='Twitter'><FontAwesomeIcon icon={faTwitter} /></a></li>
-                    <li><a target='_blank' rel='noopener noreferrer' href='https://github.com/wangz10' title='GitHub'><FontAwesomeIcon icon={faGithub} /></a></li>
-                    <li><a target='_blank' rel='noopener noreferrer' href='https://www.linkedin.com/in/zichenwang/' title='LinkedIn'><FontAwesomeIcon icon={faLinkedinIn} /></a></li>
-                    <li><a target='_blank' rel='noopener noreferrer' href='https://wangz10.medium.com/' title='Medium'><FontAwesomeIcon icon={faMediumM} /></a></li>
-                    <li><a target='_blank' rel='noopener noreferrer' href='https://scholar.google.com/citations?user=bwLMCp4AAAAJ' title='Google Scholar'><FontAwesomeIcon icon={faGoogle} /></a></li>
-                    <li><a target='_blank' rel='noopener noreferrer' href='https://www.researchgate.net/profile/Zichen_Wang' title='ResearchGate'><FontAwesomeIcon icon={faResearchgate} /></a></li>
-                    <li><a target='_blank' rel='noopener noreferrer' href='http://orcid.org/0000-0002-1415-1286' title='ORCID'><FontAwesomeIcon icon={faOrcid} /></a></li>
-                  </ul>
+                  <img className='portrait' src='./assets/profile_placeholder.svg' alt='Profile' />
+                  <h3 className='text-center'>Research Engineer</h3>
+                  <h4 className='text-center'>Flexible Electronics & Robotics</h4>
                 </div>
               </Col>
               <Col md={8} xs={12}>
                 <h1>About</h1>
                 <p className='lead'>
-                  I am a senior applied scientist at {' '}
-                  <a href='https://aws.amazon.com/' target='_blank' rel='noopener noreferrer'>
-                    AWS
-                  </a> AI Research and Education (AIRE). I am interested in various research areas in ML, including graph neural networks (GNN), natural language processing (NLP), generative modeling, and their applications in biology and chemistry.
-                  I have over 10 years of experience in life sciences and healthcare. In the past, I worked on developing ML methods leveraging biomedical data including biological sequences, multi-omics, and longitudinal electronic health records (EHR), for drug discovery and modeling of human diseases.
+                  I work on integrated sensing and robotic intelligence systems, combining flexible sensors,
+                  wearable electronics, signal acquisition, AI-based data analysis, robot tactile feedback,
+                  and digital-twin simulation. My research bridges the gap between physical sensing hardware
+                  and intelligent software systems.
                 </p>
                 <p className='lead'>
-                  I obtained my PhD in 2016 from <a href='https://icahn.mssm.edu/' target='_blank' rel='noopener noreferrer'> Icahn School of Medicine at Mount Sinai</a> and was advised by <a href='https://icahn.mssm.edu/profiles/avi-maayan' target='_blank' rel='noopener noreferrer'>Avi Ma'ayan</a>, with whom I continued working on multiple research projects on understanding how drugs work in biological systems using computational biology. I developed solid software engineering skills in making interactive data visualizations and web applications.
+                  My background spans flexible electronics fabrication, embedded systems (ESP32-C3, precision ADC),
+                  computer vision (YOLOv8), ROS2-based robot control and simulation (MoveIt, Gazebo), and
+                  machine learning for sensor data analysis. I build practical tools and GUIs that make
+                  research workflows reproducible and efficient.
                 </p>
               </Col>
             </Row>

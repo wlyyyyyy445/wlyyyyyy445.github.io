@@ -4,31 +4,23 @@ import {
   Row,
   Col,
   Navbar,
-  Nav,
-  Button
+  Nav
 } from 'react-bootstrap'
 import Scrollspy from 'react-scrollspy'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faDownload } from '@fortawesome/free-solid-svg-icons'
 import {
-  faLinkedinIn,
-  faTwitter,
   faGithub,
-  faMediumM,
-  faGoogle,
-  faResearchgate,
-  faOrcid
+  faGoogle
 } from '@fortawesome/free-brands-svg-icons'
 import './App.css'
 
 // individual sections
 import About from './about'
-import Resume from './resume'
-import './resume.css'
-import { Publications, parsePublication } from './publications'
+import { Publications } from './publications'
 import './publications.css'
 import Projects from './projects'
 import Softwares from './softwares'
+
 class NavLink extends Component {
   constructor(props) {
     super(props)
@@ -36,16 +28,13 @@ class NavLink extends Component {
   }
 
   handleClick(event) {
-    // smoothly scroll to target with offset
     event.preventDefault()
-    // remove the leading "#"
     const targetId = this.props.href.slice(1)
     const el = document.getElementById(targetId)
     const bodyRect = document.body.getBoundingClientRect().top
     const elementRect = el.getBoundingClientRect().top
     const elementPosition = elementRect - bodyRect
     const offsetPosition = elementPosition - 72
-
     window.scrollTo({
       top: offsetPosition,
       behavior: 'smooth'
@@ -56,14 +45,15 @@ class NavLink extends Component {
     return <a className='nav-link' href={this.props.href} onClick={(e) => this.handleClick(e)}>{this.props.name}</a>
   }
 }
+
 // navbar with scrollspy
 const navbar = (
-  <Navbar fixed='top' variant='dark' style={{ backgroundColor: '#0089A7' }} expand='sm'>
-    <Navbar.Brand href='#'>Zichen Wang, PhD</Navbar.Brand>
+  <Navbar fixed='top' variant='dark' style={{ backgroundColor: '#2c3e50' }} expand='sm'>
+    <Navbar.Brand href='#'>Research Engineer</Navbar.Brand>
     <Navbar.Toggle aria-controls='responsive-navbar-nav' />
     <Navbar.Collapse id='responsive-navbar-nav'>
       <Scrollspy
-        items={['about', 'resume', 'softwares', 'publications']}
+        items={['about', 'research', 'projects', 'softwares', 'publications', 'contact']}
         offset={-72}
         currentClassName='nav-item active'
         className='navbar-nav mr-auto'
@@ -72,13 +62,19 @@ const navbar = (
           <NavLink href='#about' name='About' />
         </Nav.Item>
         <Nav.Item as='li'>
-          <NavLink href='#resume' name='Resume' />
+          <NavLink href='#research' name='Research' />
         </Nav.Item>
         <Nav.Item as='li'>
-          <NavLink href='#softwares' name='Softwares' />
+          <NavLink href='#projects' name='Projects' />
+        </Nav.Item>
+        <Nav.Item as='li'>
+          <NavLink href='#softwares' name='Software' />
         </Nav.Item>
         <Nav.Item as='li'>
           <NavLink href='#publications' name='Publications' />
+        </Nav.Item>
+        <Nav.Item as='li'>
+          <NavLink href='#contact' name='Contact' />
         </Nav.Item>
       </Scrollspy>
     </Navbar.Collapse>
@@ -91,73 +87,43 @@ class App extends Component {
     this.state = {
       resumeData: null,
       pubData: null,
-      softwareData: null
+      softwareData: null,
+      projData: null
     }
-    this.handleSortBtnClick = this.handleSortBtnClick.bind(this)
   }
 
   getResumeData() {
     fetch('./assets/resumeData.json').then(response => {
-      if (response.ok) {
-        return response.json()
-      } else {
-        throw new Error('Something went wrong when fetching data ...')
-      }
-    }).then(data => {
-      this.setState({ resumeData: data })
-    })
+      if (response.ok) return response.json()
+      throw new Error('Something went wrong when fetching data ...')
+    }).then(data => this.setState({ resumeData: data }))
   }
 
   getPublicationData() {
     fetch('./assets/publications.json').then(response => {
-      if (response.ok) {
-        return response.json()
-      } else {
-        throw new Error('Something went wrong when fetching data ...')
-      }
-    }).then(data => {
-      const parsedData = data.map((datum, i) => {
-        return parsePublication(datum)
-      })
-      this.setState({ pubData: parsedData })
-    })
+      if (response.ok) return response.json()
+      throw new Error('Something went wrong when fetching data ...')
+    }).then(data => this.setState({ pubData: data }))
   }
 
   getProjectData() {
     fetch('./assets/projects.json').then(response => {
-      if (response.ok) {
-        return response.json()
-      } else {
-        throw new Error('Something went wrong when fetching data ...')
-      }
-    }).then(data => {
-      this.setState({ projData: data })
-    })
+      if (response.ok) return response.json()
+      throw new Error('Something went wrong when fetching data ...')
+    }).then(data => this.setState({ projData: data }))
   }
 
   getSoftwareData() {
     fetch('./assets/softwares.json').then(response => {
-      if (response.ok) {
-        return response.json()
-      } else {
-        throw new Error('Something went wrong when fetching data ...')
-      }
-    }).then(data => {
-      this.setState({ softwareData: data })
-    })
-  }
-
-  handleSortBtnClick(nextSortKey) {
-    let sortedPubData = [].concat(this.state.pubData).sort((a, b) => b.year - a.year)
-    if (nextSortKey === 'myRank') {
-      sortedPubData = [].concat(this.state.pubData).sort((a, b) => a.myRank - b.myRank)
-    }
-    this.setState({ pubData: sortedPubData })
+      if (response.ok) return response.json()
+      throw new Error('Something went wrong when fetching data ...')
+    }).then(data => this.setState({ softwareData: data }))
   }
 
   componentDidMount() {
     this.getResumeData()
     this.getPublicationData()
+    this.getProjectData()
     this.getSoftwareData()
   }
 
@@ -167,47 +133,54 @@ class App extends Component {
         {navbar}
         <About />
         <Container fluid={true}>
-          <Row id='resume' className='justify-content-md-center'>
+          <Row id='research' className='justify-content-md-center'>
             <Col md={10} sm={12}>
-              <Button variant='outline-info' href='./assets/Zichen_Wang_Resume-04172021.pdf' className='my-2 mr-2' download>
-                Resume <FontAwesomeIcon icon={faDownload} />
-              </Button>
-              <Button variant='outline-info' href='./assets/Zichen_Wang_CV-11062022.pdf' className='my-2 ml-2' download>
-                CV <FontAwesomeIcon icon={faDownload} />
-              </Button>
-              <Resume data={this.state.resumeData} />
-
+              <h1>Research Interests</h1>
+              <ul className='lead'>
+                <li>Flexible electronics and wearable sensors</li>
+                <li>Electronic skin and tactile sensing</li>
+                <li>Stick-slip sensing and contact state recognition</li>
+                <li>Robot tactile feedback and dexterous manipulation</li>
+                <li>Embedded signal acquisition with ESP32-C3 and precision ADCs</li>
+                <li>Computer vision and YOLO-based industrial inspection</li>
+                <li>ROS2, MoveIt, Gazebo, and robot digital twins</li>
+                <li>AI-driven sensor data analysis</li>
+              </ul>
             </Col>
           </Row>
-          {/* <Row id='projects' className='justify-content-md-center'>
+          <Row id='projects' className='justify-content-md-center'>
             <Col md={10} sm={12}>
               <h1>Selected Projects</h1>
               <Projects data={this.state.projData} />
             </Col>
-          </Row> */}
+          </Row>
           <Row id='softwares' className='justify-content-md-center'>
             <Col md={10} sm={12}>
-              <h1>Softwares</h1>
+              <h1>Software & Tools</h1>
               <Softwares data={this.state.softwareData} />
             </Col>
           </Row>
           <Row id='publications' className='justify-content-md-center'>
             <Col md={10} sm={12}>
               <h1>Publications</h1>
-              <Publications data={this.state.pubData} onSortBtnClick={this.handleSortBtnClick} maxHeight={window.innerHeight} />
+              <Publications data={this.state.pubData} />
+            </Col>
+          </Row>
+          <Row id='contact' className='justify-content-md-center'>
+            <Col md={10} sm={12}>
+              <h1>Contact</h1>
+              <p className='lead'>Email: your.email@example.com</p>
+              <p className='lead'>GitHub: <a href='https://github.com/wyyyyyyy445' target='_blank' rel='noopener noreferrer'>wyyyyyyy445</a></p>
+              <p className='lead'>Google Scholar: To be added</p>
+              <p className='lead'>LinkedIn: To be added</p>
             </Col>
           </Row>
         </Container>
         <footer className='py-5'>
           <Container>
             <ul className='social-links text-center'>
-              <li><a target='_blank' rel='noopener noreferrer' href='https://twitter.com/ZichenWangPhD' title='Twitter'><FontAwesomeIcon icon={faTwitter} /></a></li>
-              <li><a target='_blank' rel='noopener noreferrer' href='https://github.com/wangz10' title='GitHub'><FontAwesomeIcon icon={faGithub} /></a></li>
-              <li><a target='_blank' rel='noopener noreferrer' href='https://www.linkedin.com/in/zichenwang/' title='LinkedIn'><FontAwesomeIcon icon={faLinkedinIn} /></a></li>
-              <li><a target='_blank' rel='noopener noreferrer' href='https://wangz10.medium.com/' title='Medium'><FontAwesomeIcon icon={faMediumM} /></a></li>
-              <li><a target='_blank' rel='noopener noreferrer' href='https://scholar.google.com/citations?user=bwLMCp4AAAAJ&hl=en' title='Google Scholar'><FontAwesomeIcon icon={faGoogle} /></a></li>
-              <li><a target='_blank' rel='noopener noreferrer' href='https://www.researchgate.net/profile/Zichen_Wang' title='ResearchGate'><FontAwesomeIcon icon={faResearchgate} /></a></li>
-              <li><a target='_blank' rel='noopener noreferrer' href='http://orcid.org/0000-0002-1415-1286' title='ORCID'><FontAwesomeIcon icon={faOrcid} /></a></li>
+              <li><a target='_blank' rel='noopener noreferrer' href='https://github.com/wyyyyyyy445' title='GitHub'><FontAwesomeIcon icon={faGithub} /></a></li>
+              <li><span title='Google Scholar' style={{cursor:'default'}}><FontAwesomeIcon icon={faGoogle} /></span></li>
             </ul>
             <p className='m-0 text-center text-white'>All rights reserved.</p>
           </Container>

@@ -1,54 +1,27 @@
 [
     {
-        "title": "react-scatter-board",
-        "url": "https://maayanlab.github.io/react-scatter-board/",
-        "source": "https://github.com/MaayanLab/react-scatter-board",
-        "desc": "a reusable React library for interactive THREE.js 2d/3d scatter plots."
+        "title": "Python GUI for Sensor Visualization",
+        "url": "#",
+        "desc": "A Tkinter/PyQt-based GUI for real-time sensor data visualization, FFT analysis, and signal ranking."
     },
     {
-        "title": "msea",
-        "url": "https://pypi.org/project/msea/",
-        "source": "https://bitbucket.org/wangz10/msea/src/master/",
-        "desc": "a Python package implementing Microbe-Set Enrichment Analysis (MSEA) for functional interpretation of sets of microbial organisms."
+        "title": "FFT and Ranking Analysis Tools",
+        "url": "#",
+        "desc": "Command-line and GUI tools for frequency-domain analysis of sensor signals with automated ranking and report generation."
     },
     {
-        "title": "scAVI",
-        "url": "https://amp.pharm.mssm.edu/scavi/",
-        "source": "https://github.com/MaayanLab/scAVI",
-        "desc": "a web-based platform to analyze and visualize single cell RNA-seq data."
+        "title": "ROS2 Robot Control Panels",
+        "url": "#",
+        "desc": "Tkinter-based control panels for ROS2 robot arm visualization, joint control, and trajectory preview."
     },
     {
-        "title": "GeoDEpy",
-        "url": "https://github.com/MaayanLab/geode",
-        "desc": "a Python package implementing the Characteristic Direction, a geometrical approach to differential expression and gene-set enrichment."
+        "title": "YOLOv8 Detection GUI",
+        "url": "#",
+        "desc": "A PyQt-based GUI application for YOLOv8 model inference on images, videos, and live camera feeds."
     },
     {
-        "title": "Hair-GEL",
-        "url": "http://hair-gel.net/",
-        "desc": "a searchable gene expression library for hair follicles.",
-        "source": "https://github.com/MaayanLab/HairGEL"
-    },
-    {
-        "title": "Principal Angle Enrichment Analysis (PAEA)",
-        "url": "http://amp.pharm.mssm.edu/PAEA/",
-        "desc": "Dimensionally reduced multivariate gene set enrichment analysis tool. It uses the geometrical concept of the principal angle to quantify gene-set enrichment.",
-        "source": "https://github.com/MaayanLab/PAEA"
-    },
-    {
-        "title": "Drug Gene Budger (DGB)",
-        "url": "https://maayanlab.cloud/DGB/",
-        "desc": "a web-based and mobile application developed to assist investigators in order to prioritize small molecules that are predicted to maximally influence the expression of their target gene of interest.",
-        "source": "https://github.com/MaayanLab/Dr-Gene-Budger"
-    },
-    {
-        "title": "LJP Breast Cancer Network Browser",
-        "url": "https://amp.pharm.mssm.edu/LJP/",
-        "desc": "visualizes thousands of signatures from six breast cancer cell lines treated with ~100 single molecule perturbations, mostly kinase inhibitors.",
-        "source": "https://github.com/MaayanLab/LJP"
-    },
-    {
-        "title": "DEveLopmental Trajectory Atlas (DELTA)",
-        "url": "https://amp.pharm.mssm.edu/DLPFC",
-        "desc": "a web application visualizing transcriptome and proteome in dorsolateral prefrontal cortex"
+        "title": "Data Logging and Report Generation Tools",
+        "url": "#",
+        "desc": "Python utilities for structured data logging, experiment tracking, and automated report generation."
     }
 ]

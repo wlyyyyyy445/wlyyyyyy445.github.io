@@ -1,0 +1,27 @@
+[
+    {
+        "title": "Python GUI for Sensor Visualization",
+        "url": "#",
+        "desc": "A Tkinter/PyQt-based GUI for real-time sensor data visualization, FFT analysis, and signal ranking."
+    },
+    {
+        "title": "FFT and Ranking Analysis Tools",
+        "url": "#",
+        "desc": "Command-line and GUI tools for frequency-domain analysis of sensor signals with automated ranking and report generation."
+    },
+    {
+        "title": "ROS2 Robot Control Panels",
+        "url": "#",
+        "desc": "Tkinter-based control panels for ROS2 robot arm visualization, joint control, and trajectory preview."
+    },
+    {
+        "title": "YOLOv8 Detection GUI",
+        "url": "#",
+        "desc": "A PyQt-based GUI application for YOLOv8 model inference on images, videos, and live camera feeds."
+    },
+    {
+        "title": "Data Logging and Report Generation Tools",
+        "url": "#",
+        "desc": "Python utilities for structured data logging, experiment tracking, and automated report generation."
+    }
+]

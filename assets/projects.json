@@ -1,0 +1,44 @@
+[
+    {
+        "title": "Flexible Tactile Sensing and Stick-Slip Analysis",
+        "desc": "A flexible sensing system for contact, friction, and stick-slip signal acquisition, with FFT-based feature extraction and GUI visualization.",
+        "tags": ["flexible sensors", "tactile sensing", "stick-slip", "FFT", "GUI"],
+        "img": "assets/profile_placeholder.svg",
+        "links": []
+    },
+    {
+        "title": "ESP32-C3 Signal Acquisition Platform",
+        "desc": "An embedded data acquisition platform using ESP32-C3, ADC front-end circuits, serial streaming, and Python visualization tools for micro-current sensing.",
+        "tags": ["ESP32-C3", "ADC", "embedded", "micro-current", "Python"],
+        "img": "assets/profile_placeholder.svg",
+        "links": []
+    },
+    {
+        "title": "Electronic Skin for Robotic Tactile Feedback",
+        "desc": "A robotic tactile feedback concept integrating flexible sensor arrays, signal processing, and closed-loop manipulation.",
+        "tags": ["electronic skin", "tactile feedback", "sensor arrays", "robotics"],
+        "img": "assets/profile_placeholder.svg",
+        "links": []
+    },
+    {
+        "title": "ROS2 / MoveIt / Gazebo Digital Twin",
+        "desc": "A robot digital-twin workflow for simulation, motion planning, grasp preview, and GUI-based control.",
+        "tags": ["ROS2", "MoveIt", "Gazebo", "digital twin", "simulation"],
+        "img": "assets/profile_placeholder.svg",
+        "links": []
+    },
+    {
+        "title": "YOLOv8 Industrial Part Detection System",
+        "desc": "A machine-vision system for industrial part detection using YOLOv8, PyQt GUI, image/video/camera input, and result visualization.",
+        "tags": ["YOLOv8", "computer vision", "PyQt", "detection"],
+        "img": "assets/profile_placeholder.svg",
+        "links": []
+    },
+    {
+        "title": "AI Sensor Data Analysis Pipeline",
+        "desc": "A data-analysis pipeline for sensor signal preprocessing, feature extraction, model training, ranking, and experimental evaluation.",
+        "tags": ["AI", "sensor data", "feature extraction", "pipeline"],
+        "img": "assets/profile_placeholder.svg",
+        "links": []
+    }
+]

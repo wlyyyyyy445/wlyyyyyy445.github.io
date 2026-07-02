@@ -1,0 +1,73 @@
+{
+    "education": [
+        {
+            "name": "Your University",
+            "degree": "PhD",
+            "date": "YEAR - YEAR",
+            "area": "Your Research Area",
+            "summary": "Brief summary of your doctoral research.",
+            "location": "City, Country"
+        }
+    ],
+    "work": [
+        {
+            "name": "Current / Recent Position",
+            "position": "Research Engineer",
+            "date": "YEAR - PRESENT",
+            "summary": "Brief description of your current work and responsibilities.",
+            "location": "City, Country"
+        }
+    ],
+    "skills": [
+        {
+            "category": "Sensing & Hardware",
+            "items": [
+                "Flexible Electronics",
+                "Electronic Skin",
+                "Tactile Sensing",
+                "ESP32-C3",
+                "Precision ADC",
+                "Signal Acquisition"
+            ]
+        },
+        {
+            "category": "Robotics & Simulation",
+            "items": [
+                "ROS2",
+                "MoveIt",
+                "Gazebo",
+                "Digital Twin",
+                "Robot Control"
+            ]
+        },
+        {
+            "category": "AI & Vision",
+            "items": [
+                "YOLOv8",
+                "Computer Vision",
+                "Sensor Data Analysis",
+                "Feature Extraction",
+                "Model Training"
+            ]
+        },
+        {
+            "category": "Software Development",
+            "items": {
+                "Languages": ["Python", "C++", "JavaScript", "Bash"],
+                "GUI": ["Tkinter", "PyQt/PySide", "pyqtgraph"],
+                "Web": ["React.js", "Bootstrap"],
+                "Tools": ["Docker", "Git", "Linux"]
+            }
+        }
+    ],
+    "languages": [
+        {
+            "category": "Programming",
+            "items": ["Python", "C++", "JavaScript", "Bash", "SQL"]
+        },
+        {
+            "category": "Natural",
+            "items": ["English", "Mandarin"]
+        }
+    ]
+}

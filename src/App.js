@@ -48,8 +48,8 @@ class NavLink extends Component {
 
 // navbar with scrollspy
 const navbar = (
-  <Navbar fixed='top' variant='dark' style={{ backgroundColor: '#2c3e50' }} expand='sm'>
-    <Navbar.Brand href='#'>Research Engineer</Navbar.Brand>
+  <Navbar fixed='top' variant='light' style={{ background: 'rgba(255,255,255,0.92)', boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 2px 8px rgba(0,0,0,0.04)' }} expand='sm'>
+    <Navbar.Brand href='#' style={{ color: '#7d9bb5', fontWeight: 700, fontSize: '1.35rem', letterSpacing: '-0.3px' }}>Luyao Wang</Navbar.Brand>
     <Navbar.Toggle aria-controls='responsive-navbar-nav' />
     <Navbar.Collapse id='responsive-navbar-nav'>
       <Scrollspy
@@ -132,57 +132,75 @@ class App extends Component {
       <div>
         {navbar}
         <About />
-        <Container fluid={true}>
-          <Row id='research' className='justify-content-md-center'>
-            <Col md={10} sm={12}>
-              <h1>Research Interests</h1>
-              <ul className='lead'>
-                <li>Flexible electronics and wearable sensors</li>
-                <li>Electronic skin and tactile sensing</li>
-                <li>Stick-slip sensing and contact state recognition</li>
-                <li>Robot tactile feedback and dexterous manipulation</li>
-                <li>Embedded signal acquisition with ESP32-C3 and precision ADCs</li>
-                <li>Computer vision and YOLO-based industrial inspection</li>
-                <li>ROS2, MoveIt, Gazebo, and robot digital twins</li>
-                <li>AI-driven sensor data analysis</li>
-              </ul>
-            </Col>
-          </Row>
-          <Row id='projects' className='justify-content-md-center'>
-            <Col md={10} sm={12}>
-              <h1>Selected Projects</h1>
-              <Projects data={this.state.projData} />
-            </Col>
-          </Row>
-          <Row id='softwares' className='justify-content-md-center'>
-            <Col md={10} sm={12}>
-              <h1>Software & Tools</h1>
-              <Softwares data={this.state.softwareData} />
-            </Col>
-          </Row>
-          <Row id='publications' className='justify-content-md-center'>
-            <Col md={10} sm={12}>
-              <h1>Publications</h1>
-              <Publications data={this.state.pubData} />
-            </Col>
-          </Row>
-          <Row id='contact' className='justify-content-md-center'>
-            <Col md={10} sm={12}>
-              <h1>Contact</h1>
-              <p className='lead'>Email: your.email@example.com</p>
-              <p className='lead'>GitHub: <a href='https://github.com/wyyyyyyy445' target='_blank' rel='noopener noreferrer'>wyyyyyyy445</a></p>
-              <p className='lead'>Google Scholar: To be added</p>
-              <p className='lead'>LinkedIn: To be added</p>
-            </Col>
-          </Row>
-        </Container>
+        <div className='section-white'>
+          <Container fluid={true}>
+            <Row id='research' className='justify-content-md-center'>
+              <Col md={10} sm={12}>
+                <h1>Research Interests</h1>
+                <ul className='lead'>
+                  <li>Flexible electronics and wearable sensors</li>
+                  <li>Electronic skin and tactile sensing</li>
+                  <li>Stick-slip sensing and contact state recognition</li>
+                  <li>Robot tactile feedback and dexterous manipulation</li>
+                  <li>Embedded signal acquisition with ESP32-C3 and precision ADCs</li>
+                  <li>Computer vision and YOLO-based industrial inspection</li>
+                  <li>ROS2, MoveIt, Gazebo, and robot digital twins</li>
+                  <li>AI-driven sensor data analysis</li>
+                </ul>
+              </Col>
+            </Row>
+          </Container>
+        </div>
+        <div className='section-warm'>
+          <Container fluid={true}>
+            <Row id='projects' className='justify-content-md-center'>
+              <Col md={10} sm={12}>
+                <h1>Selected Projects</h1>
+                <Projects data={this.state.projData} />
+              </Col>
+            </Row>
+          </Container>
+        </div>
+        <div className='section-white'>
+          <Container fluid={true}>
+            <Row id='softwares' className='justify-content-md-center'>
+              <Col md={10} sm={12}>
+                <h1>Software &amp; Tools</h1>
+                <Softwares data={this.state.softwareData} />
+              </Col>
+            </Row>
+          </Container>
+        </div>
+        <div className='section-warm'>
+          <Container fluid={true}>
+            <Row id='publications' className='justify-content-md-center'>
+              <Col md={10} sm={12}>
+                <h1>Publications</h1>
+                <Publications data={this.state.pubData} />
+              </Col>
+            </Row>
+          </Container>
+        </div>
+        <div id='contact' className='contact-section'>
+          <Container fluid={true}>
+            <Row className='justify-content-md-center'>
+              <Col md={10} sm={12}>
+                <h1>Contact</h1>
+                <p className='lead'>Email: your.email@example.com</p>
+                <p className='lead'>GitHub: <a href='https://github.com/wyyyyyyy445' target='_blank' rel='noopener noreferrer'>wyyyyyyy445</a></p>
+                <p className='lead'>Google Scholar: To be added</p>
+                <p className='lead'>LinkedIn: To be added</p>
+              </Col>
+            </Row>
+          </Container>
+        </div>
         <footer className='py-5'>
           <Container>
             <ul className='social-links text-center'>
               <li><a target='_blank' rel='noopener noreferrer' href='https://github.com/wyyyyyyy445' title='GitHub'><FontAwesomeIcon icon={faGithub} /></a></li>
               <li><span title='Google Scholar' style={{cursor:'default'}}><FontAwesomeIcon icon={faGoogle} /></span></li>
             </ul>
-            <p className='m-0 text-center text-white'>All rights reserved.</p>
+            <p className='m-0 text-center'>All rights reserved.</p>
           </Container>
         </footer>
       </div>

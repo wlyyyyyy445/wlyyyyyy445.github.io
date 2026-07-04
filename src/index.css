@@ -1,12 +1,47 @@
+/* ============================================================
+   Personal Research Engineer Homepage — Refined Design
+   Palette: warm white + deep sage-teal accent + dark contrast
+   ============================================================ */
+
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif;
+  background: #f8f9fb;
+  color: #3d3d3d;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+    "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+    "Helvetica Neue", sans-serif;
+  font-size: 16px;
+  line-height: 1.7;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* ---- Section headings — left accent bar style ---- */
+h1 {
+  font-weight: 800;
+  font-size: 2.2rem;
+  color: #1a1a1a;
+  margin-top: 0;
+  margin-bottom: 2rem;
+  padding-left: 1.2rem;
+  border-left: 4px solid #7d9bb5;
+  letter-spacing: -0.5px;
+  line-height: 1.3;
+}
+
+h2 {
+  font-weight: 700;
+  font-size: 1.4rem;
+  color: #2a2a2a;
+  margin-bottom: 1rem;
+}
+
+h3, h4 {
+  font-weight: 600;
+  color: #2a2a2a;
+}
+
+/* ---- Portrait ---- */
 .portrait {
   display: block;
   width: 200px;
@@ -15,34 +50,82 @@ body {
   border-radius: 50%;
   background-size: cover;
   -webkit-background-size: cover;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 3px solid #ffffff;
 }
 
+/* ---- Paragraphs ---- */
 p {
   font-family: 'Lora', 'Times New Roman', serif;
+  color: #3d3d3d;
+  line-height: 1.8;
+  font-size: 1.02rem;
 }
 
+.lead {
+  font-size: 1.08rem;
+  line-height: 1.85;
+  font-weight: 400;
+  color: #4a4a4a;
+}
+
+/* ---- Navbar — clean white, refined shadow ---- */
 nav.navbar {
-  font-weight: bold;
+  font-weight: 600;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 a.nav-link {
   font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   line-height: 2.5;
+  color: #555 !important;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  transition: color 0.2s ease;
 }
 
+a.nav-link:hover {
+  color: #7d9bb5 !important;
+}
+
+.nav-item.active .nav-link {
+  color: #7d9bb5 !important;
+  font-weight: 700;
+}
+
+/* ---- Code ---- */
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 }
 
-footer {
-  background-color: #2c3e50;
+/* ---- Section blocks — alternating backgrounds ---- */
+.section-white {
+  background: #ffffff;
+  padding-top: 4rem;
+  padding-bottom: 4rem;
 }
 
+.section-warm {
+  background: #f2f4f7;
+  padding-top: 4rem;
+  padding-bottom: 4rem;
+}
+
+/* ---- Footer — light, clean separation ---- */
+footer {
+  background: #eaecf0;
+  border-top: 1px solid #e0e0e0;
+}
+
+/* ---- Social links (in-page) ---- */
 .social-links {
   list-style: none outside;
   padding: 0;
-  font-size: 30px;  
+  font-size: 32px;
 }
 
 .social-links li {
@@ -52,17 +135,104 @@ footer {
 }
 
 .social-links > li > a {
-  color: #2c3e50;
+  color: #7d9bb5;
+  transition: color 0.2s ease, transform 0.2s ease;
+  display: inline-block;
 }
 
 .social-links > li > a:hover {
-  color: #aaa;
+  color: #5c7e9e;
+  transform: translateY(-2px);
 }
 
+/* ---- Social links (in footer) ---- */
 footer > div > ul > li > a {
-  color: #ccc!important;
+  color: #7d9bb5 !important;
+  transition: color 0.2s ease, transform 0.2s ease;
+  display: inline-block;
 }
 
 footer > div > ul > li > a:hover {
-  color: #fff!important;
+  color: #5c7e9e !important;
+  transform: translateY(-2px);
+}
+
+footer > div > p {
+  color: #999;
+  font-size: 0.85rem;
+}
+
+footer .social-links > li > span {
+  color: #bbb;
+}
+
+/* ---- Research list ---- */
+ul.lead li {
+  color: #3d3d3d;
+  line-height: 2.2;
+  font-size: 1.05rem;
+  padding: 0.2rem 0;
+  font-family: 'Lora', 'Times New Roman', serif;
+}
+
+/* ---- Contact section ---- */
+.contact-section {
+  background: #f2f4f7;
+  padding-top: 4rem;
+  padding-bottom: 4rem;
+}
+
+.contact-section a {
+  color: #7d9bb5;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.contact-section a:hover {
+  color: #5c7e9e;
+}
+
+/* ---- Card common ---- */
+.card {
+  border: none;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06), 0 8px 24px rgba(0, 0, 0, 0.07);
+}
+
+.card-header {
+  background: #ffffff;
+  border-bottom: 1px solid #ece9e5;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: #1a1a1a;
+  letter-spacing: -0.2px;
+}
+
+.card-text {
+  font-family: 'Lora', 'Times New Roman', serif;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: #555;
+}
+
+.card-body {
+  background: #ffffff;
+}
+
+/* ---- Badge / Tag ---- */
+.badge-secondary {
+  background: #edf2f7;
+  color: #7d9bb5;
+  font-weight: 500;
+  font-size: 0.75rem;
+  padding: 0.3em 0.7em;
+  border-radius: 4px;
 }

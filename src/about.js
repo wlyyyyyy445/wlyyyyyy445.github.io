@@ -3,16 +3,15 @@ import { Container, Row, Col, Jumbotron } from 'react-bootstrap'
 
 function About() {
   return (
-    <Jumbotron fluid id='about'>
+    <Jumbotron fluid id='about' style={{ background: '#ffffff', marginBottom: 0, paddingTop: '5rem' }}>
       <Container fluid>
         <Row className='justify-content-md-center'>
           <Col md={10} sm={12} className='mt-3'>
             <Row>
               <Col md={4} xs={12}>
-                <div style={{ display: 'block' }}>
-                  <img className='portrait' src='./assets/profile_placeholder.svg' alt='Profile' />
-                  <h3 className='text-center'>Research Engineer</h3>
-                  <h4 className='text-center'>Flexible Electronics & Robotics</h4>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', marginLeft: '-2rem' }}>
+                  <img className='portrait' src='./assets/profile.jpg' alt='Luyao Wang' />
+                  <h3 style={{ marginLeft: '2rem' }}>Luyao Wang</h3>
                 </div>
               </Col>
               <Col md={8} xs={12}>

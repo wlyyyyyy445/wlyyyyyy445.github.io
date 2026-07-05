@@ -54,8 +54,8 @@ function LanguageSwitcher() {
   return (
     <NavDropdown
       title={
-        <span className='lang-switch-btn'>
-          <FontAwesomeIcon icon={faGlobe} className='lang-icon' /> <span className='lang-label'>{t.languages[lang]}</span>
+        <span className='lang-toggle'>
+          <FontAwesomeIcon icon={faGlobe} /> {t.languages[lang]}
         </span>
       }
       id='lang-dropdown'

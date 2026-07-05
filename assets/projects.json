@@ -1,43 +1,43 @@
 [
     {
-        "title": "Flexible Tactile Sensing and Stick-Slip Analysis",
-        "desc": "A flexible sensing system for contact, friction, and stick-slip signal acquisition, with FFT-based feature extraction and GUI visualization.",
-        "tags": ["flexible sensors", "tactile sensing", "stick-slip", "FFT", "GUI"],
+        "title": "FSAE Driverless Steering System",
+        "desc": "Designed a dual-PID closed-loop steering system for HIT's Formula Student driverless racing car. Used SolidWorks for 3D modeling and assembly verification. Developed Python-based upper-computer software for real-time data visualization, parameter tuning, and status monitoring. Completed embedded firmware flashing and system integration on Ubuntu.",
+        "tags": ["PID Control", "SolidWorks", "Python GUI", "Embedded", "PCB Design"],
         "img": "assets/profile_placeholder.svg",
         "links": []
     },
     {
-        "title": "ESP32-C3 Signal Acquisition Platform",
-        "desc": "An embedded data acquisition platform using ESP32-C3, ADC front-end circuits, serial streaming, and Python visualization tools for micro-current sensing.",
-        "tags": ["ESP32-C3", "ADC", "embedded", "micro-current", "Python"],
+        "title": "RES Dual-Circuit Board System",
+        "desc": "Designed a dual-circuit board solution for the RES (Race Emergency System), covering schematic design, PCB layout, fabrication verification, and hardware integration. Ensured reliable system operation under complex racing conditions.",
+        "tags": ["PCB Layout", "Schematic Design", "Hardware Testing", "Automotive"],
         "img": "assets/profile_placeholder.svg",
         "links": []
     },
     {
-        "title": "Electronic Skin for Robotic Tactile Feedback",
-        "desc": "A robotic tactile feedback concept integrating flexible sensor arrays, signal processing, and closed-loop manipulation.",
-        "tags": ["electronic skin", "tactile feedback", "sensor arrays", "robotics"],
+        "title": "Flexible Electronics I-V Characterization",
+        "desc": "Built I-V measurement circuits for flexible electronic devices to analyze electrical performance of low-dimensional nanomaterials under bending conditions. Used MATLAB/Python for data processing and analysis. Participated in sensor structure optimization to study material parameter effects on sensitivity and response time.",
+        "tags": ["Flexible Electronics", "I-V Characterization", "MATLAB", "Python"],
         "img": "assets/profile_placeholder.svg",
         "links": []
     },
     {
-        "title": "ROS2 / MoveIt / Gazebo Digital Twin",
-        "desc": "A robot digital-twin workflow for simulation, motion planning, grasp preview, and GUI-based control.",
-        "tags": ["ROS2", "MoveIt", "Gazebo", "digital twin", "simulation"],
+        "title": "Solar Tracking Control System",
+        "desc": "Developed an automatic solar tracking system based on 51 MCU as project leader. Completed circuit design, PCB layout, and system simulation verification. Achieved real-time sun-tracking control for photovoltaic panels.",
+        "tags": ["51 MCU", "PCB Design", "Control System", "Photovoltaic"],
         "img": "assets/profile_placeholder.svg",
         "links": []
     },
     {
-        "title": "YOLOv8 Industrial Part Detection System",
-        "desc": "A machine-vision system for industrial part detection using YOLOv8, PyQt GUI, image/video/camera input, and result visualization.",
-        "tags": ["YOLOv8", "computer vision", "PyQt", "detection"],
+        "title": "Flexible Bioelectronics Review",
+        "desc": "Contributed to a review paper on flexible bioelectronics at SIAT, surveying state-of-the-art wearable sensor technologies. Analyzed structural design, signal acquisition methods, and application scenarios of various bioelectronic devices. Participated in manuscript framework design and technical writing.",
+        "tags": ["Bioelectronics", "Wearable Sensors", "Literature Review", "Review Paper"],
         "img": "assets/profile_placeholder.svg",
         "links": []
     },
     {
-        "title": "AI Sensor Data Analysis Pipeline",
-        "desc": "A data-analysis pipeline for sensor signal preprocessing, feature extraction, model training, ranking, and experimental evaluation.",
-        "tags": ["AI", "sensor data", "feature extraction", "pipeline"],
+        "title": "Vehicle Electronics Integration",
+        "desc": "Participated in full-vehicle electrical system integration and debugging for the FSAE driverless car, achieving multi-module cooperative control. Completed circuit design, functional verification, and ensured stable system operation under complex driving conditions.",
+        "tags": ["System Integration", "Circuit Design", "Multi-module Control", "FSAE"],
         "img": "assets/profile_placeholder.svg",
         "links": []
     }

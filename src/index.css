@@ -238,6 +238,11 @@ ul.lead li {
 }
 
 /* ---- Language switcher ---- */
+.lang-switch-wrapper {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+}
 .lang-switch-btn {
   display: inline-flex !important;
   align-items: center;

@@ -96,7 +96,7 @@ function AppNavbar() {
           <Nav.Item as='li'><NavLink href='#publications' name={nav.publications} /></Nav.Item>
           <Nav.Item as='li'><NavLink href='#contact' name={nav.contact} /></Nav.Item>
         </Scrollspy>
-        <LanguageSwitcher />
+        <div className='lang-switch-wrapper'><LanguageSwitcher /></div>
       </Navbar.Collapse>
     </Navbar>
   )

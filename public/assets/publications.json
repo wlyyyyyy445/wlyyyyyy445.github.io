@@ -1,1 +1,21 @@
-[]
+[
+    {
+        "title": "Toward Self-Sustained Wearables: Energy Harvesting, Storage, and Smart Power Management",
+        "authors": ["(Co-author)"],
+        "journal": "Wearable Electronics",
+        "year": 2026,
+        "note": "Accepted, in press"
+    },
+    {
+        "title": "A Hardware-Based Safety Loop Control and Fault Handling System (CN223955993U)",
+        "authors": ["L. Wang (First Author)"],
+        "journal": "China Utility Model Patent (Granted)",
+        "year": 2025
+    },
+    {
+        "title": "Racing Car System Integration Box — Low Voltage (CN309876302S)",
+        "authors": ["L. Wang (First Author)"],
+        "journal": "China Design Patent (Granted)",
+        "year": 2025
+    }
+]

@@ -1,59 +1,29 @@
-import React, { Component } from 'react'
+import React from 'react'
 import { Row } from 'react-bootstrap'
 
-class Software extends Component {
-  render() {
-    const { data } = this.props
-    const title = <a href={data.url} target='_blank' rel='noopener noreferrer' className='title'>{data.title}</a>
-    const description = <p className='description'>{data.desc}</p>
-    const sourceLink = <span> [<a href={data.source} target='_blank' rel='noopener noreferrer'>source code</a>]</span>
+function Software({ data }) {
+  const title = data.url
+    ? <a href={data.url} target='_blank' rel='noopener noreferrer' className='title'>{data.title}</a>
+    : <span className='title'>{data.title}</span>
+  const description = <p className='description'>{data.desc}</p>
 
-    if (data.source) {
-      return (
-        <li className='list-inline-item'>
-          {title}
-          {sourceLink}
-          {description}
-
-        </li>
-      )
-    } else {
-      return (
-        <li className='list-inline-item'>
-          {title}
-          {description}
-        </li>
-      )
-    }
-  }
+  return (
+    <li className='list-inline-item'>
+      {title}
+      {description}
+    </li>
+  )
 }
 
-class Softwares extends Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      data: props.data
-    }
-  }
-
-  render() {
-    if (this.props.data) {
-      const { data } = this.props
-      const lis = []
-      for (let i = 0; i < data.length; i++) {
-        lis.push(<Software data={data[i]} key={i} />)
-      }
-      return (
-        <Row>
-          <ul>
-            {lis}
-          </ul>
-        </Row>
-      )
-    } else {
-      return <Row />
-    }
-  }
+function Softwares({ data }) {
+  if (!data || data.length === 0) return <Row />
+  return (
+    <Row>
+      <ul>
+        {data.map((item, i) => <Software data={item} key={i} />)}
+      </ul>
+    </Row>
+  )
 }
 
 export default Softwares

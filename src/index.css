@@ -236,3 +236,19 @@ ul.lead li {
   padding: 0.3em 0.7em;
   border-radius: 4px;
 }
+
+/* ---- RTL for Arabic ---- */
+[dir='rtl'] {
+  text-align: right;
+}
+
+[dir='rtl'] h1 {
+  border-left: none;
+  border-right: 4px solid #7d9bb5;
+  padding-left: 0;
+  padding-right: 1.2rem;
+}
+
+[dir='rtl'] .navbar-nav {
+  padding-right: 0;
+}

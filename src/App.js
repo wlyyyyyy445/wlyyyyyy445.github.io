@@ -1,10 +1,11 @@
-import React, { Component } from 'react'
+import React, { Component, useEffect } from 'react'
 import {
   Container,
   Row,
   Col,
   Navbar,
-  Nav
+  Nav,
+  NavDropdown
 } from 'react-bootstrap'
 import Scrollspy from 'react-scrollspy'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -12,7 +13,9 @@ import {
   faGithub,
   faGoogle
 } from '@fortawesome/free-brands-svg-icons'
+import { faLanguage } from '@fortawesome/free-solid-svg-icons'
 import './App.css'
+import { LanguageProvider, useLanguage } from './i18n/LanguageContext'
 
 // individual sections
 import About from './about'
@@ -46,164 +49,141 @@ class NavLink extends Component {
   }
 }
 
-// navbar with scrollspy
-const navbar = (
-  <Navbar fixed='top' variant='light' style={{ background: 'rgba(255,255,255,0.92)', boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 2px 8px rgba(0,0,0,0.04)' }} expand='sm'>
-    <Navbar.Brand href='#' style={{ color: '#7d9bb5', fontWeight: 700, fontSize: '1.35rem', letterSpacing: '-0.3px' }}>Luyao Wang</Navbar.Brand>
-    <Navbar.Toggle aria-controls='responsive-navbar-nav' />
-    <Navbar.Collapse id='responsive-navbar-nav'>
-      <Scrollspy
-        items={['about', 'research', 'projects', 'softwares', 'publications', 'contact']}
-        offset={-72}
-        currentClassName='nav-item active'
-        className='navbar-nav mr-auto'
-      >
-        <Nav.Item as='li'>
-          <NavLink href='#about' name='About' />
-        </Nav.Item>
-        <Nav.Item as='li'>
-          <NavLink href='#research' name='Research' />
-        </Nav.Item>
-        <Nav.Item as='li'>
-          <NavLink href='#projects' name='Projects' />
-        </Nav.Item>
-        <Nav.Item as='li'>
-          <NavLink href='#softwares' name='Software' />
-        </Nav.Item>
-        <Nav.Item as='li'>
-          <NavLink href='#publications' name='Publications' />
-        </Nav.Item>
-        <Nav.Item as='li'>
-          <NavLink href='#contact' name='Contact' />
-        </Nav.Item>
-      </Scrollspy>
-    </Navbar.Collapse>
-  </Navbar>
-)
+function LanguageSwitcher() {
+  const { lang, setLang, t, supportedLangs } = useLanguage()
+  return (
+    <NavDropdown
+      title={<span style={{ fontSize: '0.85rem' }}><FontAwesomeIcon icon={faLanguage} /> {t.languages[lang]}</span>}
+      id='lang-dropdown'
+      alignRight
+      style={{ marginLeft: '0.5rem' }}
+    >
+      {supportedLangs.map(code => (
+        <NavDropdown.Item
+          key={code}
+          active={lang === code}
+          onClick={() => setLang(code)}
+          style={{ fontSize: '0.85rem', fontWeight: lang === code ? 700 : 400 }}
+        >
+          {t.languages[code]}
+        </NavDropdown.Item>
+      ))}
+    </NavDropdown>
+  )
+}
+
+function AppNavbar() {
+  const { t } = useLanguage()
+  const nav = t.nav
+  return (
+    <Navbar fixed='top' variant='light' style={{ background: 'rgba(255,255,255,0.92)', boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 2px 8px rgba(0,0,0,0.04)' }} expand='md'>
+      <Navbar.Brand href='#' style={{ color: '#7d9bb5', fontWeight: 700, fontSize: '1.35rem', letterSpacing: '-0.3px' }}>{t.brand}</Navbar.Brand>
+      <Navbar.Toggle aria-controls='responsive-navbar-nav' />
+      <Navbar.Collapse id='responsive-navbar-nav'>
+        <Scrollspy
+          items={['about', 'research', 'projects', 'softwares', 'publications', 'contact']}
+          offset={-72}
+          currentClassName='nav-item active'
+          className='navbar-nav mr-auto'
+        >
+          <Nav.Item as='li'><NavLink href='#about' name={nav.about} /></Nav.Item>
+          <Nav.Item as='li'><NavLink href='#research' name={nav.research} /></Nav.Item>
+          <Nav.Item as='li'><NavLink href='#projects' name={nav.projects} /></Nav.Item>
+          <Nav.Item as='li'><NavLink href='#softwares' name={nav.software} /></Nav.Item>
+          <Nav.Item as='li'><NavLink href='#publications' name={nav.publications} /></Nav.Item>
+          <Nav.Item as='li'><NavLink href='#contact' name={nav.contact} /></Nav.Item>
+        </Scrollspy>
+        <LanguageSwitcher />
+      </Navbar.Collapse>
+    </Navbar>
+  )
+}
+
+function AppContent() {
+  const { t, lang } = useLanguage()
+
+  useEffect(() => {
+    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr'
+  }, [lang])
+
+  return (
+    <div>
+      <AppNavbar />
+      <About />
+      <div className='section-white'>
+        <Container fluid={true}>
+          <Row id='research' className='justify-content-md-center'>
+            <Col md={10} sm={12}>
+              <h1>{t.research.heading}</h1>
+              <ul className='lead'>
+                {t.research.items.map((item, i) => <li key={i}>{item}</li>)}
+              </ul>
+            </Col>
+          </Row>
+        </Container>
+      </div>
+      <div className='section-warm'>
+        <Container fluid={true}>
+          <Row id='projects' className='justify-content-md-center'>
+            <Col md={10} sm={12}>
+              <h1>{t.projects.heading}</h1>
+              <Projects data={t.projects.items} />
+            </Col>
+          </Row>
+        </Container>
+      </div>
+      <div className='section-white'>
+        <Container fluid={true}>
+          <Row id='softwares' className='justify-content-md-center'>
+            <Col md={10} sm={12}>
+              <h1>{t.software.heading}</h1>
+              <Softwares data={t.software.items} />
+            </Col>
+          </Row>
+        </Container>
+      </div>
+      <div className='section-warm'>
+        <Container fluid={true}>
+          <Row id='publications' className='justify-content-md-center'>
+            <Col md={10} sm={12}>
+              <h1>{t.publications.heading}</h1>
+              <Publications data={t.publications} />
+            </Col>
+          </Row>
+        </Container>
+      </div>
+      <div id='contact' className='contact-section'>
+        <Container fluid={true}>
+          <Row className='justify-content-md-center'>
+            <Col md={10} sm={12}>
+              <h1>{t.contact.heading}</h1>
+              <p className='lead'>{t.contact.emailLabel} <a href='mailto:2023212283@stu.hit.edu.cn'>2023212283@stu.hit.edu.cn</a></p>
+              <p className='lead'>{t.contact.githubLabel} <a href='https://github.com/wyyyyyyy445' target='_blank' rel='noopener noreferrer'>wyyyyyyy445</a></p>
+              <p className='lead'>{t.contact.scholarLabel} {t.contact.toBeAdded}</p>
+              <p className='lead'>{t.contact.linkedinLabel} {t.contact.toBeAdded}</p>
+            </Col>
+          </Row>
+        </Container>
+      </div>
+      <footer className='py-5'>
+        <Container>
+          <ul className='social-links text-center'>
+            <li><a target='_blank' rel='noopener noreferrer' href='https://github.com/wyyyyyyy445' title='GitHub'><FontAwesomeIcon icon={faGithub} /></a></li>
+            <li><span title='Google Scholar' style={{cursor:'default'}}><FontAwesomeIcon icon={faGoogle} /></span></li>
+          </ul>
+          <p className='m-0 text-center'>{t.footer.copyright}</p>
+        </Container>
+      </footer>
+    </div>
+  )
+}
 
 class App extends Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      resumeData: null,
-      pubData: null,
-      softwareData: null,
-      projData: null
-    }
-  }
-
-  getResumeData() {
-    fetch('./assets/resumeData.json').then(response => {
-      if (response.ok) return response.json()
-      throw new Error('Something went wrong when fetching data ...')
-    }).then(data => this.setState({ resumeData: data }))
-  }
-
-  getPublicationData() {
-    fetch('./assets/publications.json').then(response => {
-      if (response.ok) return response.json()
-      throw new Error('Something went wrong when fetching data ...')
-    }).then(data => this.setState({ pubData: data }))
-  }
-
-  getProjectData() {
-    fetch('./assets/projects.json').then(response => {
-      if (response.ok) return response.json()
-      throw new Error('Something went wrong when fetching data ...')
-    }).then(data => this.setState({ projData: data }))
-  }
-
-  getSoftwareData() {
-    fetch('./assets/softwares.json').then(response => {
-      if (response.ok) return response.json()
-      throw new Error('Something went wrong when fetching data ...')
-    }).then(data => this.setState({ softwareData: data }))
-  }
-
-  componentDidMount() {
-    this.getResumeData()
-    this.getPublicationData()
-    this.getProjectData()
-    this.getSoftwareData()
-  }
-
   render() {
     return (
-      <div>
-        {navbar}
-        <About />
-        <div className='section-white'>
-          <Container fluid={true}>
-            <Row id='research' className='justify-content-md-center'>
-              <Col md={10} sm={12}>
-                <h1>Research Interests</h1>
-                <ul className='lead'>
-                  <li>Flexible electronics and wearable sensors</li>
-                  <li>Electronic skin and tactile sensing</li>
-                  <li>Stick-slip sensing and contact state recognition</li>
-                  <li>Robot tactile feedback and dexterous manipulation</li>
-                  <li>Embedded signal acquisition with ESP32-C3 and precision ADCs</li>
-                  <li>Computer vision and YOLO-based industrial inspection</li>
-                  <li>ROS2, MoveIt, Gazebo, and robot digital twins</li>
-                  <li>AI-driven sensor data analysis</li>
-                </ul>
-              </Col>
-            </Row>
-          </Container>
-        </div>
-        <div className='section-warm'>
-          <Container fluid={true}>
-            <Row id='projects' className='justify-content-md-center'>
-              <Col md={10} sm={12}>
-                <h1>Selected Projects</h1>
-                <Projects data={this.state.projData} />
-              </Col>
-            </Row>
-          </Container>
-        </div>
-        <div className='section-white'>
-          <Container fluid={true}>
-            <Row id='softwares' className='justify-content-md-center'>
-              <Col md={10} sm={12}>
-                <h1>Software &amp; Tools</h1>
-                <Softwares data={this.state.softwareData} />
-              </Col>
-            </Row>
-          </Container>
-        </div>
-        <div className='section-warm'>
-          <Container fluid={true}>
-            <Row id='publications' className='justify-content-md-center'>
-              <Col md={10} sm={12}>
-                <h1>Publications</h1>
-                <Publications data={this.state.pubData} />
-              </Col>
-            </Row>
-          </Container>
-        </div>
-        <div id='contact' className='contact-section'>
-          <Container fluid={true}>
-            <Row className='justify-content-md-center'>
-              <Col md={10} sm={12}>
-                <h1>Contact</h1>
-                <p className='lead'>Email: your.email@example.com</p>
-                <p className='lead'>GitHub: <a href='https://github.com/wyyyyyyy445' target='_blank' rel='noopener noreferrer'>wyyyyyyy445</a></p>
-                <p className='lead'>Google Scholar: To be added</p>
-                <p className='lead'>LinkedIn: To be added</p>
-              </Col>
-            </Row>
-          </Container>
-        </div>
-        <footer className='py-5'>
-          <Container>
-            <ul className='social-links text-center'>
-              <li><a target='_blank' rel='noopener noreferrer' href='https://github.com/wyyyyyyy445' title='GitHub'><FontAwesomeIcon icon={faGithub} /></a></li>
-              <li><span title='Google Scholar' style={{cursor:'default'}}><FontAwesomeIcon icon={faGoogle} /></span></li>
-            </ul>
-            <p className='m-0 text-center'>All rights reserved.</p>
-          </Container>
-        </footer>
-      </div>
+      <LanguageProvider>
+        <AppContent />
+      </LanguageProvider>
     )
   }
 }

@@ -1,27 +1,27 @@
 [
     {
-        "title": "Python GUI for Sensor Visualization",
+        "title": "Steering System Upper-Computer GUI",
         "url": "#",
-        "desc": "A Tkinter/PyQt-based GUI for real-time sensor data visualization, FFT analysis, and signal ranking."
+        "desc": "Python-based GUI for real-time steering system data visualization, online parameter tuning, and status monitoring. Developed independently for the FSAE driverless racing car."
     },
     {
-        "title": "FFT and Ranking Analysis Tools",
+        "title": "Sensor Data Processing & Analysis Toolkit",
         "url": "#",
-        "desc": "Command-line and GUI tools for frequency-domain analysis of sensor signals with automated ranking and report generation."
+        "desc": "MATLAB and Python scripts for I-V curve analysis, signal preprocessing, and experimental data visualization for flexible electronics characterization."
     },
     {
-        "title": "ROS2 Robot Control Panels",
+        "title": "SolidWorks 3D Modeling & Assembly",
         "url": "#",
-        "desc": "Tkinter-based control panels for ROS2 robot arm visualization, joint control, and trajectory preview."
+        "desc": "3D part modeling, assembly verification, and engineering drawing generation for FSAE steering system and mechanical components."
     },
     {
-        "title": "YOLOv8 Detection GUI",
+        "title": "PCB Design & Schematic Layout",
         "url": "#",
-        "desc": "A PyQt-based GUI application for YOLOv8 model inference on images, videos, and live camera feeds."
+        "desc": "Complete PCB design workflow including schematic capture, layout, design rule checking, and fabrication file generation for automotive and embedded systems."
     },
     {
-        "title": "Data Logging and Report Generation Tools",
+        "title": "Embedded Firmware & System Configuration",
         "url": "#",
-        "desc": "Python utilities for structured data logging, experiment tracking, and automated report generation."
+        "desc": "Embedded program flashing and Linux (Ubuntu) system configuration for embedded control modules, including toolchain setup and firmware deployment."
     }
 ]

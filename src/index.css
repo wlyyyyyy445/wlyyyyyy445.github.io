@@ -237,6 +237,43 @@ ul.lead li {
   border-radius: 4px;
 }
 
+/* ---- Language switcher ---- */
+.lang-switch-btn {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  background: #7d9bb5;
+  color: #fff !important;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 1px 3px rgba(125, 155, 181, 0.3);
+}
+
+.lang-switch-btn:hover,
+.lang-switch-btn:focus {
+  background: #5c7e9e;
+  box-shadow: 0 2px 6px rgba(125, 155, 181, 0.45);
+  color: #fff !important;
+}
+
+.lang-icon {
+  font-size: 0.95rem;
+}
+
+.lang-label {
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* Override bootstrap nav-link colors inside the lang switcher */
+a.nav-link.lang-switch-btn {
+  color: #fff !important;
+}
+
 /* ---- RTL for Arabic ---- */
 [dir='rtl'] {
   text-align: right;

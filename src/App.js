@@ -13,7 +13,7 @@ import {
   faGithub,
   faGoogle
 } from '@fortawesome/free-brands-svg-icons'
-import { faLanguage } from '@fortawesome/free-solid-svg-icons'
+import { faGlobe } from '@fortawesome/free-solid-svg-icons'
 import './App.css'
 import { LanguageProvider, useLanguage } from './i18n/LanguageContext'
 
@@ -53,10 +53,13 @@ function LanguageSwitcher() {
   const { lang, setLang, t, supportedLangs } = useLanguage()
   return (
     <NavDropdown
-      title={<span style={{ fontSize: '0.85rem' }}><FontAwesomeIcon icon={faLanguage} /> {t.languages[lang]}</span>}
+      title={
+        <span className='lang-switch-btn'>
+          <FontAwesomeIcon icon={faGlobe} className='lang-icon' /> <span className='lang-label'>{t.languages[lang]}</span>
+        </span>
+      }
       id='lang-dropdown'
       alignRight
-      style={{ marginLeft: '0.5rem' }}
     >
       {supportedLangs.map(code => (
         <NavDropdown.Item

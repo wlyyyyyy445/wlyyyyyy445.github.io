@@ -82,6 +82,13 @@ nav.navbar {
   align-items: center;
 }
 
+/* Navbar logo */
+.nav-logo {
+  height: 36px;
+  width: auto;
+  vertical-align: middle;
+}
+
 a.nav-link {
   font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   line-height: 2.5;

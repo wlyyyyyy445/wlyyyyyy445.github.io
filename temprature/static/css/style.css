@@ -1,0 +1,336 @@
+/* ============================================================
+   Temprature Monitor — IoT Light Dashboard Theme
+   Inspired by Dribbble IoT Dashboard Management UI
+   ============================================================ */
+
+/* --- CSS Variables --- */
+:root {
+    --bg: #F0F2F5;
+    --card-bg: #FFFFFF;
+    --card-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --card-shadow-hover: 0 4px 12px rgba(0,0,0,0.08);
+    --radius: 14px;
+    --radius-sm: 8px;
+
+    --text-primary: #1A1A2E;
+    --text-secondary: #6B7280;
+    --text-muted: #9CA3AF;
+
+    --accent-temp: #3B82F6;
+    --accent-temp-bg: #EFF6FF;
+    --accent-current: #10B981;
+    --accent-current-bg: #ECFDF5;
+    --accent-voltage: #F59E0B;
+    --accent-voltage-bg: #FFFBEB;
+    --accent-battery: #8B5CF6;
+    --accent-battery-bg: #F5F3FF;
+
+    --border: #E5E7EB;
+    --tab-active: #3B82F6;
+    --tab-hover: #F3F4F6;
+    --danger: #EF4444;
+    --success: #10B981;
+    --warning: #F59E0B;
+
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans SC", sans-serif;
+    --font-mono: "SF Mono", "Cascadia Code", "Consolas", monospace;
+
+    --sidebar-width: 0px;
+}
+
+/* --- Reset --- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; }
+body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text-primary);
+    line-height: 1.5;
+    min-height: 100vh;
+}
+
+/* --- Top Bar --- */
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1.5rem;
+    height: 56px;
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+.brand-icon { font-size: 1.3rem; }
+.brand-text { font-weight: 600; font-size: 1.05rem; margin-left: 0.4rem; }
+.topbar-status {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+}
+.status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+.status-dot.connected { background: var(--success); box-shadow: 0 0 6px var(--success); }
+.status-dot.disconnected { background: var(--text-muted); }
+.status-port { color: var(--text-secondary); font-family: var(--font-mono); font-size: 0.8rem; }
+
+/* --- Tab Bar --- */
+.tabbar {
+    display: flex;
+    gap: 0;
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--border);
+    padding: 0 1rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+.tabbar::-webkit-scrollbar { height: 0; }
+.tab {
+    padding: 0.75rem 1.2rem;
+    border: none;
+    background: none;
+    font-size: 0.875rem;
+    font-family: var(--font);
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: color 0.15s, border-color 0.15s;
+}
+.tab:hover:not(.disabled) { color: var(--text-primary); background: var(--tab-hover); }
+.tab.active { color: var(--tab-active); border-bottom-color: var(--tab-active); font-weight: 600; }
+.tab.disabled { color: var(--text-muted); cursor: not-allowed; opacity: 0.5; }
+
+/* --- Main Content --- */
+.main-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1.5rem 1.5rem 3rem;
+}
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* --- Cards Row --- */
+.cards-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+.secondary-row {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+/* --- Individual Card --- */
+.card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 1.25rem 1.5rem;
+    box-shadow: var(--card-shadow);
+    border: 1px solid var(--border);
+    transition: box-shadow 0.2s;
+}
+.card:hover { box-shadow: var(--card-shadow-hover); }
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 0.5rem;
+}
+.card-icon { font-size: 1.1rem; }
+.card-title { font-size: 0.85rem; color: var(--text-secondary); font-weight: 500; }
+.card-unit { font-size: 0.75rem; color: var(--text-muted); margin-left: auto; }
+.card-value {
+    font-size: 2.4rem;
+    font-weight: 700;
+    font-family: var(--font);
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+}
+.card-status {
+    font-size: 0.8rem;
+    margin-top: 0.3rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 100px;
+    display: inline-block;
+}
+.card-sub {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 0.3rem;
+}
+
+/* Card color accents */
+.card-temp .card-value { color: var(--accent-temp); }
+.card-temp .card-status { background: var(--accent-temp-bg); color: var(--accent-temp); }
+.card-current .card-value { color: var(--accent-current); }
+.card-current .card-status { background: var(--accent-current-bg); color: var(--accent-current); }
+.card-voltage .card-value { color: var(--accent-voltage); }
+.card-voltage .card-status { background: var(--accent-voltage-bg); color: var(--accent-voltage); }
+.card-battery .card-value { color: var(--accent-battery); }
+.card-uptime .card-value { font-size: 1.8rem; color: var(--text-primary); }
+
+/* --- Charts Grid --- */
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+.chart-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--card-shadow);
+    border: 1px solid var(--border);
+    padding: 1rem;
+}
+.chart-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+.chart-container {
+    position: relative;
+    height: 220px;
+    width: 100%;
+}
+.chart-container canvas { width: 100% !important; }
+
+/* --- History Tab --- */
+.history-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+.history-count { color: var(--text-secondary); font-size: 0.85rem; }
+.history-table-wrap {
+    overflow-x: auto;
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--card-shadow);
+    border: 1px solid var(--border);
+}
+.history-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+.history-table th {
+    background: #F9FAFB;
+    padding: 0.6rem 0.8rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+}
+.history-table td {
+    padding: 0.5rem 0.8rem;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+}
+.history-table tr:hover { background: #F9FAFB; }
+
+/* --- Settings Tab --- */
+.settings-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--card-shadow);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+}
+.settings-card h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+.settings-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+/* --- Buttons & Inputs --- */
+.btn {
+    padding: 0.45rem 1rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    font-size: 0.85rem;
+    font-family: var(--font);
+    cursor: pointer;
+    color: var(--text-primary);
+    transition: background 0.15s;
+    white-space: nowrap;
+}
+.btn:hover { background: var(--tab-hover); }
+.btn-primary {
+    background: var(--accent-temp);
+    color: #fff;
+    border-color: var(--accent-temp);
+}
+.btn-primary:hover { background: #2563EB; }
+.btn-danger { color: var(--danger); border-color: var(--danger); }
+.btn-danger:hover { background: #FEF2F2; }
+.btn-sm { padding: 0.3rem 0.6rem; font-size: 0.75rem; }
+#ble-status { font-size: 0.75rem; color: var(--text-muted); margin-right: 0.5rem; }
+.select {
+    padding: 0.45rem 0.75rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    font-size: 0.85rem;
+    font-family: var(--font);
+    background: var(--card-bg);
+    min-width: 200px;
+}
+.input-sm {
+    width: 80px;
+    padding: 0.3rem 0.5rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    font-size: 0.85rem;
+    font-family: var(--font-mono);
+}
+
+/* --- Responsive Design --- */
+@media (max-width: 900px) {
+    .cards-row { grid-template-columns: 1fr; }
+    .secondary-row { grid-template-columns: 1fr; }
+    .charts-grid { grid-template-columns: 1fr; }
+    .chart-container { height: 200px; }
+    .card-value { font-size: 2rem; }
+    .topbar { padding: 0 1rem; }
+    .main-content { padding: 1rem 0.75rem 2rem; }
+}
+
+@media (max-width: 480px) {
+    .card-value { font-size: 1.7rem; }
+    .tab { padding: 0.6rem 0.8rem; font-size: 0.8rem; }
+    .chart-container { height: 180px; }
+    .history-table { font-size: 0.75rem; }
+}
+
+/* --- Mobile Tab Scrolling --- */
+@media (max-width: 768px) {
+    .tabbar {
+        gap: 0;
+        padding: 0 0.5rem;
+        justify-content: flex-start;
+    }
+    .tab { padding: 0.6rem 0.8rem; font-size: 0.8rem; }
+    .settings-row { flex-direction: column; align-items: flex-start; }
+    .select { width: 100%; }
+}

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#3B82F6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>Temprature Monitor</title>
+    <link rel="manifest" href="static/manifest.json">
+    <link rel="stylesheet" href="static/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <!-- ====== Top Bar ====== -->
+    <header class="topbar">
+        <div class="topbar-brand">
+            <span class="brand-icon">🌡</span>
+            <span class="brand-text">Temprature Monitor</span>
+        </div>
+        <div class="topbar-status">
+            <button id="btn-ble-connect" class="btn btn-sm" onclick="toggleBLE()">🔗 连接BLE</button>
+            <span id="ble-status">BLE 未连接</span>
+            <span id="conn-indicator" class="status-dot disconnected"></span>
+            <span id="conn-text" class="status-label">未连接</span>
+            <span id="conn-port" class="status-port"></span>
+        </div>
+    </header>
+
+    <!-- ====== Tab Navigation ====== -->
+    <nav class="tabbar" id="tabbar">
+        <button class="tab active" data-tab="dashboard">📊 Dashboard</button>
+        <button class="tab" data-tab="history">📈 历史数据</button>
+        <button class="tab" data-tab="settings">⚙️ 设备设置</button>
+        <button class="tab disabled" data-tab="ble" disabled>🔵 BLE (待开发)</button>
+        <button class="tab disabled" data-tab="calibrate" disabled>🔬 校准 (待开发)</button>
+        <button class="tab disabled" data-tab="forward" disabled>📡 转发 (待开发)</button>
+    </nav>
+
+    <!-- ====== Tab Content ====== -->
+    <main class="main-content">
+        <!-- Dashboard Tab -->
+        <section class="tab-content active" id="tab-dashboard">
+            <!-- 3 Cards Row -->
+            <div class="cards-row">
+                <div class="card card-temp">
+                    <div class="card-header">
+                        <span class="card-icon">🌡</span>
+                        <span class="card-title">温度</span>
+                        <span class="card-unit">°C</span>
+                    </div>
+                    <div class="card-value" id="val-temp">--</div>
+                    <div class="card-status" id="status-temp">等待数据</div>
+                </div>
+                <div class="card card-current">
+                    <div class="card-header">
+                        <span class="card-icon">⚡</span>
+                        <span class="card-title">电流</span>
+                        <span class="card-unit">μA</span>
+                    </div>
+                    <div class="card-value" id="val-current">--</div>
+                    <div class="card-status" id="status-current">等待数据</div>
+                </div>
+                <div class="card card-voltage">
+                    <div class="card-header">
+                        <span class="card-icon">🔌</span>
+                        <span class="card-title">电压</span>
+                        <span class="card-unit">V</span>
+                    </div>
+                    <div class="card-value" id="val-voltage">--</div>
+                    <div class="card-status" id="status-voltage">等待数据</div>
+                </div>
+            </div>
+
+            <!-- Battery Voltage Card (computed) -->
+            <div class="cards-row secondary-row">
+                <div class="card card-battery">
+                    <div class="card-header">
+                        <span class="card-icon">🔋</span>
+                        <span class="card-title">电池电压 (推算)</span>
+                        <span class="card-unit">V</span>
+                    </div>
+                    <div class="card-value" id="val-battery">--</div>
+                    <div class="card-sub" id="sub-battery">分压链 3×100kΩ</div>
+                </div>
+                <div class="card card-uptime">
+                    <div class="card-header">
+                        <span class="card-icon">⏱</span>
+                        <span class="card-title">运行时间</span>
+                    </div>
+                    <div class="card-value" id="val-uptime">--</div>
+                    <div class="card-sub" id="sub-uptime">ESP32-C3</div>
+                </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <h3 class="chart-title">🌡 温度趋势 (°C)</h3>
+                    <div class="chart-container">
+                        <canvas id="chart-temp"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h3 class="chart-title">⚡ 电流趋势 (μA)</h3>
+                    <div class="chart-container">
+                        <canvas id="chart-current"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h3 class="chart-title">🔌 电压趋势 (V)</h3>
+                    <div class="chart-container">
+                        <canvas id="chart-voltage"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- History Tab -->
+        <section class="tab-content" id="tab-history">
+            <div class="history-toolbar">
+                <button id="btn-refresh-history" class="btn">🔄 刷新</button>
+                <button id="btn-export-csv" class="btn">📥 导出 CSV</button>
+                <span class="history-count" id="history-count">0 条记录</span>
+            </div>
+            <div class="history-table-wrap">
+                <table class="history-table" id="history-table">
+                    <thead>
+                        <tr>
+                            <th>时间</th>
+                            <th>温度 (°C)</th>
+                            <th>电流 (μA)</th>
+                            <th>电压 (V)</th>
+                            <th>电池 (V)</th>
+                            <th>正常运行</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Settings Tab -->
+        <section class="tab-content" id="tab-settings">
+            <div class="settings-card">
+                <h3>后端服务器地址</h3>
+                <div class="settings-row">
+                    <input type="text" id="backend-url" placeholder="http://localhost:8080" class="input-text" style="width:320px">
+                    <button id="btn-save-backend" class="btn btn-primary">💾 保存并重连</button>
+                </div>
+                <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.5rem">
+                    💡 本地调试默认 localhost:8080；远程使用 Cloudflare Tunnel 或云服务器地址
+                </div>
+            </div>
+            <div class="settings-card">
+                <h3>串口连接</h3>
+                <div class="settings-row">
+                    <select id="port-select" class="select">
+                        <option value="">-- 扫描串口 --</option>
+                    </select>
+                    <button id="btn-scan" class="btn">🔍 扫描</button>
+                    <button id="btn-connect" class="btn btn-primary">🔗 连接</button>
+                    <button id="btn-disconnect" class="btn btn-danger">⏹ 断开</button>
+                </div>
+                <div class="settings-row" style="margin-top: 1rem;">
+                    <label>采样率：<span id="sample-rate">500ms (2Hz)</span></label>
+                </div>
+            </div>
+            <div class="settings-card">
+                <h3>报警阈值</h3>
+                <div class="settings-row">
+                    <label>温度上限：<input type="number" id="thresh-temp" value="30" step="0.1" class="input-sm"> °C</label>
+                    <label>温度下限：<input type="number" id="thresh-temp-min" value="0" step="0.1" class="input-sm"> °C</label>
+                </div>
+                <div class="settings-row">
+                    <label>电流上限：<input type="number" id="thresh-current" value="1000" step="1" class="input-sm"> μA</label>
+                </div>
+                <div class="settings-row">
+                    <label>电压下限：<input type="number" id="thresh-voltage" value="2.8" step="0.01" class="input-sm"> V</label>
+                </div>
+                <button id="btn-save-thresholds" class="btn btn-primary">💾 保存</button>
+            </div>
+        </section>
+    </main>
+
+    <script src="static/js/ble_receiver.js"></script>
+    <script src="static/js/dashboard.js"></script>
+    <script>
+        // Register Service Worker for PWA
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('static/service-worker.js');
+        }
+    </script>
+</body>
+</html>

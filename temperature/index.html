@@ -7,10 +7,10 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Temperature Monitor</title>
-    <link rel="manifest" href="..static/manifest.json">
-    <link rel="stylesheet" href="..static/css/style.css">
+    <link rel="manifest" href="static/manifest.json">
+    <link rel="stylesheet" href="static/css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <script src="..static/js/lang.js"></script>
+    <script src="static/js/lang.js"></script>
 </head>
 <body>
     <!-- ====== Top Bar ====== -->
@@ -168,11 +168,11 @@
       </div>
     </div>
 
-    <script src="..static/js/ble_receiver.js"></script>
-    <script src="..static/js/dashboard.js"></script>
+    <script src="static/js/ble_receiver.js"></script>
+    <script src="static/js/dashboard.js"></script>
     <script>
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('..static/service-worker.js');
+            navigator.serviceWorker.register('static/service-worker.js');
         }
     </script>
 </body>

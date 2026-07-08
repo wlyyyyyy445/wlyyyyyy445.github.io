@@ -177,12 +177,12 @@
         <script>
         // Default backend: cloud server
         if (!localStorage.getItem('backend_url')) {
-            localStorage.setItem('backend_url', 'https://temp.luyaowang.com');
+            localStorage.setItem('backend_url', 'http://118.178.231.72');
         }
         // Check backend connectivity on load
-        fetch('https://temp.luyaowang.com/api/status').catch(function() {
+        fetch('http://118.178.231.72/api/status').catch(function() {
             document.getElementById('backend-banner').style.display = 'block';
-            document.getElementById('backend-banner').innerHTML = '无法连接后端。请直接访问 <a href="https://temp.luyaowang.com" style="color:#fff;font-weight:bold">https://temp.luyaowang.com</a> 使用完整功能（BLE数据本地显示正常，但无法保存到数据库）';
+            document.getElementById('backend-banner').innerHTML = '无法连接后端。请直接访问 <a href="http://118.178.231.72" style="color:#fff;font-weight:bold">http://118.178.231.72</a> 使用完整功能（BLE数据本地显示正常，但无法保存到数据库）';
         });
     </script>
     <script src="static/js/ble_receiver.js"></script>

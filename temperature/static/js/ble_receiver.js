@@ -9,8 +9,7 @@ let bleDevice = null;
 let bleServer = null;
 let bleConnected = false;
 
-// ADC calibration (same as relay)
-const ADC_LSB_V = 2.2 / 4096.0;
+// Calibration (matches v2 — analogReadMilliVolts)
 const TMP117_LSB_C = 0.0078125;
 const CURRENT_SENSE_R = 100000.0;
 const DIVIDER_SCALE = 3.0;
@@ -32,22 +31,23 @@ function parseBinaryBatch(buffer) {
 
         // Little-endian reads from Uint8Array
         const tempRaw = (data[offset] | (data[offset + 1] << 8)) << 16 >> 16; // i16
-        const curAdc  = data[offset + 2] | (data[offset + 3] << 8);           // u16
-        const voltAdc = data[offset + 4] | (data[offset + 5] << 8);           // u16
+        const curMv   = data[offset + 2] | (data[offset + 3] << 8);           // u16 mV
+        const voltMv  = data[offset + 4] | (data[offset + 5] << 8);           // u16 mV
         offset += 6;
 
-        const curPinV = curAdc * ADC_LSB_V;
-        const voltPinV = voltAdc * ADC_LSB_V;
+        // Calibrated millivolt → voltage (matches v2)
+        const curPinV = curMv / 1000.0;
+        const voltPinV = voltMv / 1000.0;
 
         readings.push({
-            esp_ms: baseMs + i,  // samples are 1ms apart
+            esp_ms: baseMs + i,
             temp_ok: tempRaw !== 0 ? 1 : 0,
             temp_c: parseFloat((tempRaw * TMP117_LSB_C).toFixed(2)),
-            cur_raw: curAdc,
+            cur_raw: curMv,
             cur_pin_v: parseFloat(curPinV.toFixed(6)),
             cur_ua: parseFloat(((curPinV / CURRENT_SENSE_R) * 1000000).toFixed(3)),
             divider_bat_v: parseFloat((curPinV * DIVIDER_SCALE).toFixed(3)),
-            volt_raw: voltAdc,
+            volt_raw: voltMv,
             volt_pin_v: parseFloat(voltPinV.toFixed(6)),
             voltage_v: parseFloat(voltPinV.toFixed(6)),
             source: "web_ble",

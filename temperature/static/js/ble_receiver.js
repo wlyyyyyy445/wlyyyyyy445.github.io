@@ -95,6 +95,10 @@ async function toggleBLE() {
 }
 
 async function connectBLE() {
+    if (!navigator.bluetooth) {
+        alert("Web Bluetooth 需要 HTTPS。\n请访问 https://luyaowang.com/temperature/");
+        return;
+    }
     const btn = document.getElementById("btn-ble-connect");
     btn.disabled = true;
     updateBLEStatus("扫描中...");
@@ -179,11 +183,4 @@ async function disconnectBLE() {
     updateBLEStatus("");
 }
 
-document.addEventListener("DOMContentLoaded", function () {
-    if (!navigator.bluetooth) {
-        // Always show BLE button — user wants it visible
-        var btn = document.getElementById("btn-ble-connect");
-        btn.style.opacity = "0.5";
-        btn.title = "浏览器不支持Web Bluetooth，请用Chrome/Edge";
-    }
-});
+// BLE button always visible — if browser lacks Web Bluetooth, clicking will show a helpful message

@@ -521,24 +521,23 @@ async function toggleRecording() {
     btn.disabled = true;
     try {
         if (isRecording) {
-            // Stop everything
             await fetch(apiUrl('/api/recording/stop'), { method: 'POST' });
             await fetch(apiUrl('/api/simulator/stop'), { method: 'POST' });
             updateRecordBtn(false);
         } else {
-            // Start recording. Only start simulator if no real source connected.
-            var status = await (await fetch(apiUrl('/api/status'))).json();
-            var hasRealSource = status.connected || bleConnected;
             var dev = getDeviceInfo();
-            var source = bleConnected ? 'ble' : (status.connected ? 'serial' : 'simulator');
-            await fetch(apiUrl('/api/recording/start') + '&source=' + source + '&client_name=' + encodeURIComponent(dev.name) + '&device_type=' + dev.type, { method: 'POST' });
-            if (!hasRealSource) {
-                // No real device - start simulator for demo data
-                await fetch(apiUrl('/api/simulator/start') + '&client_name=' + encodeURIComponent(dev.name) + '&device_type=' + dev.type, { method: 'POST' });
+            var source = bleConnected ? 'ble' : 'manual';
+            var resp = await fetch(apiUrl('/api/recording/start') + '&source=' + source + '&client_name=' + encodeURIComponent(dev.name) + '&device_type=' + dev.type, { method: 'POST' });
+            if (resp.ok) {
+                updateRecordBtn(true);
+            } else {
+                alert('录制启动失败: ' + resp.status);
             }
-            updateRecordBtn(true);
         }
-    } catch(e) { console.error(e); }
+    } catch(e) {
+        console.error(e);
+        alert('无法连接后端服务器。\n请检查:\n1. 后端是否运行\n2. 网络是否连通\n3. 如果是HTTPS页面, 后端也需要HTTPS');
+    }
     btn.disabled = false;
 }
 

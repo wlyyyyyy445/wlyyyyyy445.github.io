@@ -144,27 +144,37 @@ function updateCardsFromData(data) {
     checkThresholds(data);
 }
 
-// ---------- Waveform Update (2000Hz batch) ----------
+// ---------- Waveform Update (1000Hz batch, throttled to ~30fps) ----------
+let _waveformDirty = false;
+let _waveformTimer = null;
+
 function updateWaveform(readings) {
     if (!waveformChart || readings.length === 0) return;
-    // Append all readings to waveform buffers
+    // Append all readings to buffers (fast in-memory)
     for (var i = 0; i < readings.length; i++) {
         waveformCur.values.push(readings[i].cur_ua);
         waveformVolt.values.push(readings[i].voltage_v);
-        // Downsample labels: use relative time from first reading
         waveformCur.labels.push(waveformCur.labels.length);
     }
-    // Trim to max display points
+    // Trim
     while (waveformCur.values.length > WAVEFORM_MAX_POINTS) {
         waveformCur.labels.shift(); waveformCur.values.shift();
         waveformVolt.labels.shift(); waveformVolt.values.shift();
     }
-    // Update waveform chart
-    waveformChart.data.labels = waveformCur.labels;
-    waveformChart.data.datasets[0].data = waveformCur.values;
-    waveformChart.data.datasets[1].data = waveformVolt.values;
-    waveformChart.update('none');
-
+    // Throttle chart render to ~30fps
+    _waveformDirty = true;
+    if (!_waveformTimer) {
+        _waveformTimer = setTimeout(function() {
+            _waveformTimer = null;
+            if (!_waveformDirty) return;
+            _waveformDirty = false;
+            waveformChart.data.labels = waveformCur.labels;
+            waveformChart.data.datasets[0].data = waveformCur.values;
+            waveformChart.data.datasets[1].data = waveformVolt.values;
+            waveformChart.update('none');
+        }, 33);  // ~30fps
+    }
+}
     // Update slow trend charts periodically (throttled)
     if (_slowChartCounter++ % BATCH_SLOW_CHART_INTERVAL === 0) {
         var last = readings[readings.length - 1];

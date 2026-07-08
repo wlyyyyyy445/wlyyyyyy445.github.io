@@ -174,7 +174,7 @@ function updateWaveform(readings) {
             waveformChart.update('none');
         }, 33);  // ~30fps
     }
-}
+
     // Update slow trend charts periodically (throttled)
     if (_slowChartCounter++ % BATCH_SLOW_CHART_INTERVAL === 0) {
         var last = readings[readings.length - 1];

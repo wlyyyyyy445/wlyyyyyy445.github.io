@@ -90,7 +90,6 @@ function handleBLENotification(event) {
         _postBuffer = _postBuffer.slice(-100);
     }
 }
-}
 
 function updateBLEStatus(msg) {
     const el = document.getElementById("ble-status");

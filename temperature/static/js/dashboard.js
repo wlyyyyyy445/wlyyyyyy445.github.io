@@ -39,9 +39,20 @@ function setBackendUrl(url) {
 
 // ---------- State ----------
 const MAX_POINTS = 180;
+const WAVEFORM_MAX_POINTS = 600;
+const BATCH_SLOW_CHART_INTERVAL = 20; // update slow charts every N batches (~1s)
 const tempData = { labels: [], values: [] };
 const currentData = { labels: [], values: [] };
 const voltageData = { labels: [], values: [] };
+const waveformCur = { labels: [], values: [] };
+const waveformVolt = { labels: [], values: [] };
+var _slowChartCounter = 0;
+
+// Sample rate tracking
+let sampleRateHz = 0;
+let sampleCountTotal = 0;
+let sampleCountWindow = 0;
+let sampleWindowStart = Date.now();
 
 // ---------- WebSocket ----------
 let ws = null;
@@ -60,7 +71,34 @@ function connectWS() {
     };
 
     ws.onmessage = (event) => {
-        try { updateDashboard(JSON.parse(event.data)); } catch (e) {}
+        try {
+            var msg = JSON.parse(event.data);
+            if (msg.batch && Array.isArray(msg.batch)) {
+                // Batch message from 2000Hz relay
+                var count = msg.batch.length;
+                var last = msg.batch[count - 1];
+                updateCardsFromData(last);
+                updateWaveform(msg.batch);
+                // Sample rate tracking
+                sampleCountTotal += count;
+                sampleCountWindow += count;
+                var now = Date.now();
+                if (now - sampleWindowStart >= 2000) {
+                    sampleRateHz = Math.round(sampleCountWindow / ((now - sampleWindowStart) / 1000));
+                    sampleCountWindow = 0;
+                    sampleWindowStart = now;
+                    document.getElementById('sample-rate-display').textContent = sampleRateHz + ' Hz';
+                }
+            } else {
+                // Single reading (legacy / simulator / old relay)
+                updateCardsFromData(msg);
+                updateWaveform([msg]);
+                if (msg.source !== 'serial_2000hz') {
+                    sampleCountTotal++;
+                    sampleCountWindow++;
+                }
+            }
+        } catch (e) {}
     };
 
     ws.onclose = () => { wsReconnectTimer = setTimeout(connectWS, 3000); };
@@ -68,30 +106,64 @@ function connectWS() {
 }
 
 // ---------- Dashboard Update ----------
-function updateDashboard(data) {
-    // Only filter simulator data (c_ prefix = auto-generated client IDs)
-    // BLE relay and serial data pass through for all clients
-    if (data.client_id && data.client_id.startsWith('c_') && data.client_id !== getClientId()) return;
+function updateCardsFromData(data) {
+    // Update the 5 info cards from a single reading
     if (data.temp_c !== null && data.temp_c !== undefined) {
         document.getElementById('val-temp').textContent = data.temp_c.toFixed(2);
         document.getElementById('status-temp').textContent = data.temp_ok ? 'TMP117 normal' : 'Sensor error';
     }
     document.getElementById('val-current').textContent = data.cur_ua != null ? data.cur_ua.toFixed(2) : '--';
-    document.getElementById('status-current').textContent = 'Divider 3x100kΩ';
+    document.getElementById('status-current').textContent = 'Divider 3x100k\\u03A9';
     document.getElementById('val-voltage').textContent = data.voltage_v != null ? data.voltage_v.toFixed(3) : '--';
     document.getElementById('status-voltage').textContent = data.volt_pin_v != null ? 'pin ' + data.volt_pin_v.toFixed(3) + 'V' : '';
     document.getElementById('val-battery').textContent = data.divider_bat_v != null ? data.divider_bat_v.toFixed(3) : '--';
-    document.getElementById('sub-battery').textContent = 'Divider 3x100kΩ';
+    document.getElementById('sub-battery').textContent = 'Divider 3x100k\\u03A9';
     if (data.esp_ms) {
         var sec = Math.floor(data.esp_ms / 1000);
         document.getElementById('val-uptime').textContent = Math.floor(sec/60) + ':' + String(sec%60).padStart(2,'0');
         document.getElementById('sub-uptime').textContent = 'ESP32-C3';
     }
+    checkThresholds(data);
+}
+
+// ---------- Waveform Update (2000Hz batch) ----------
+function updateWaveform(readings) {
+    if (!waveformChart || readings.length === 0) return;
+    // Append all readings to waveform buffers
+    for (var i = 0; i < readings.length; i++) {
+        waveformCur.values.push(readings[i].cur_ua);
+        waveformVolt.values.push(readings[i].voltage_v);
+        // Downsample labels: use relative time from first reading
+        waveformCur.labels.push(waveformCur.labels.length);
+    }
+    // Trim to max display points
+    while (waveformCur.values.length > WAVEFORM_MAX_POINTS) {
+        waveformCur.labels.shift(); waveformCur.values.shift();
+        waveformVolt.labels.shift(); waveformVolt.values.shift();
+    }
+    // Update waveform chart
+    waveformChart.data.labels = waveformCur.labels;
+    waveformChart.data.datasets[0].data = waveformCur.values;
+    waveformChart.data.datasets[1].data = waveformVolt.values;
+    waveformChart.update('none');
+
+    // Update slow trend charts periodically (throttled)
+    if (_slowChartCounter++ % BATCH_SLOW_CHART_INTERVAL === 0) {
+        var last = readings[readings.length - 1];
+        var now = new Date().toLocaleTimeString();
+        addPoint(tempChart, tempData, now, last.temp_c, cfg.tempMax, cfg.tempMin);
+        addPoint(currentChart, currentData, now, last.cur_ua, cfg.currentMax, null);
+        addPoint(voltageChart, voltageData, now, last.voltage_v, cfg.voltageMax, cfg.voltageMin);
+    }
+}
+
+// Legacy single-reading handler (simulator, old relay)
+function updateDashboard(data) {
+    updateCardsFromData(data);
     var now = new Date().toLocaleTimeString();
     addPoint(tempChart, tempData, now, data.temp_c, cfg.tempMax, cfg.tempMin);
     addPoint(currentChart, currentData, now, data.cur_ua, cfg.currentMax, null);
     addPoint(voltageChart, voltageData, now, data.voltage_v, cfg.voltageMax, cfg.voltageMin);
-    checkThresholds(data);
 }
 
 // ---------- Thresholds ----------
@@ -154,12 +226,62 @@ function createChart(canvasId, color, label, maxLine, minLine) {
     });
 }
 
-var tempChart, currentChart, voltageChart;
+var tempChart, currentChart, voltageChart, waveformChart;
 
 function initCharts() {
     tempChart = createChart('chart-temp', '#3B82F6', '温度 °C', cfg.tempMax, cfg.tempMin);
     currentChart = createChart('chart-current', '#10B981', '电流 uA', cfg.currentMax, null);
     voltageChart = createChart('chart-voltage', '#F59E0B', '电压 V', cfg.voltageMax, cfg.voltageMin);
+    waveformChart = createWaveformChart();
+}
+
+function createWaveformChart() {
+    var ctx = document.getElementById('chart-waveform').getContext('2d');
+    return new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [
+                {
+                    label: '电流 (μA)', data: [],
+                    borderColor: '#10B981', backgroundColor: '#10B98110',
+                    borderWidth: 1.5, pointRadius: 0, tension: 0,
+                    yAxisID: 'y-cur',
+                },
+                {
+                    label: '电压 (V)', data: [],
+                    borderColor: '#F59E0B', backgroundColor: '#F59E0B10',
+                    borderWidth: 1.5, pointRadius: 0, tension: 0,
+                    yAxisID: 'y-volt',
+                },
+            ],
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            animation: false,  // no animation for high-speed waveform
+            plugins: { legend: { position: 'top', labels: { boxWidth: 12, font: { size: 10 } } } },
+            scales: {
+                x: {
+                    display: true,
+                    title: { display: true, text: 'sample #', font: { size: 10 } },
+                    ticks: { maxTicksLimit: 8, font: { size: 10 }, color: '#9CA3AF' },
+                    grid: { color: '#F3F4F6' },
+                },
+                'y-cur': {
+                    type: 'linear', position: 'left',
+                    title: { display: true, text: 'μA', font: { size: 10 } },
+                    ticks: { font: { size: 10 }, color: '#10B981' },
+                    grid: { color: '#F3F4F6' },
+                },
+                'y-volt': {
+                    type: 'linear', position: 'right',
+                    title: { display: true, text: 'V', font: { size: 10 } },
+                    ticks: { font: { size: 10 }, color: '#F59E0B' },
+                    grid: { drawOnChartArea: false },
+                },
+            },
+        },
+    });
 }
 
 // ---------- Tab Switching ----------
@@ -374,14 +496,21 @@ function clearDashboard() {
     tempData.labels = []; tempData.values = [];
     currentData.labels = []; currentData.values = [];
     voltageData.labels = []; voltageData.values = [];
+    waveformCur.labels = []; waveformCur.values = [];
+    waveformVolt.labels = []; waveformVolt.values = [];
     if (tempChart) { tempChart.data.labels = []; tempChart.data.datasets.forEach(function(d) { d.data = []; }); tempChart.update('none'); }
     if (currentChart) { currentChart.data.labels = []; currentChart.data.datasets.forEach(function(d) { d.data = []; }); currentChart.update('none'); }
     if (voltageChart) { voltageChart.data.labels = []; voltageChart.data.datasets.forEach(function(d) { d.data = []; }); voltageChart.update('none'); }
+    if (waveformChart) { waveformChart.data.labels = []; waveformChart.data.datasets.forEach(function(d) { d.data = []; }); waveformChart.update('none'); }
     document.getElementById('val-temp').textContent = '--';
     document.getElementById('val-current').textContent = '--';
     document.getElementById('val-voltage').textContent = '--';
     document.getElementById('val-battery').textContent = '--';
     document.getElementById('val-uptime').textContent = '--';
+    document.getElementById('sample-rate-display').textContent = '';
+    sampleCountTotal = 0; sampleCountWindow = 0;
+    waveformCur.values.length = 0; waveformVolt.values.length = 0;
+    waveformCur.labels.length = 0; waveformVolt.labels.length = 0;
 }
 
 var isRecording = false;

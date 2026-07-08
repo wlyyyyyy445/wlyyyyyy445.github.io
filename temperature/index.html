@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#3B82F6">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <title>Temperature Monitor</title>
+    <title>温度、电流和电压监测</title>
     <link rel="manifest" href="static/manifest.json">
     <link rel="stylesheet" href="static/css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -17,15 +17,15 @@
     <header class="topbar">
         <div class="topbar-brand">
             <span class="brand-icon">🌡</span>
-            <span class="brand-text">Temperature Monitor</span>
+            <span class="brand-text">温度、电流和电压监测</span>
         </div>
         <div class="topbar-status">
             <button id="btn-recording" class="btn btn-sm btn-record" onclick="toggleRecording()">🔴 开始采集</button>
             <span id="recording-info" class="recording-info"></span>
+            <span id="sample-rate-display" class="recording-info" style="margin-left:12px;color:var(--accent)"></span>
             <button class="btn btn-sm" onclick="clearDashboard()" title="清除曲线">🗑</button>
             <button id="btn-ble-connect" class="btn btn-sm" onclick="toggleBLE()">🔗 BLE</button>
-            <span id="ble-status"></span>
-            <select id="lang-select" class="lang-select" onchange="setLang(this.value)"><option value="zh-CN">中</option><option value="en">EN</option><option value="zh-TW">繁</option><option value="ja">日</option><option value="ko">한</option><option value="fr">FR</option><option value="de">DE</option><option value="es">ES</option><option value="pt">PT</option><option value="ru">RU</option><option value="ar">AR</option></select>
+            <span id="ble-status"></span><select id="lang-select" class="lang-select" onchange="setLang(this.value)"><option value="zh-CN">中</option><option value="en">EN</option><option value="zh-TW">繁</option><option value="ja">日</option><option value="ko">한</option><option value="fr">FR</option><option value="de">DE</option><option value="es">ES</option><option value="pt">PT</option><option value="ru">RU</option><option value="ar">AR</option></select>
             <!-- serial hidden: <span id="conn-indicator" class="status-dot disconnected"></span>
             <span id="conn-text" class="status-label">未连接</span>
             <span id="conn-port" class="status-port"></span> -->
@@ -37,9 +37,9 @@
         <button class="tab active" data-tab="dashboard">📊 Dashboard</button>
         <button class="tab" data-tab="history">📈 历史数据</button>
         <button class="tab" data-tab="settings">⚙️ 设备设置</button>
-        <button class="tab disabled" data-tab="ble" disabled>🔵 BLE (待开发)</button>
-        <button class="tab disabled" data-tab="calibrate" disabled>🔬 校准 (待开发)</button>
-        <button class="tab disabled" data-tab="forward" disabled>📡 转发 (待开发)</button>
+        
+        
+        
     </nav>
 
     <!-- ====== Tab Content ====== -->
@@ -81,6 +81,11 @@
                 <div class="chart-card"><h3 class="chart-title">🌡 温度趋势 (°C)</h3><div class="chart-container"><canvas id="chart-temp"></canvas></div></div>
                 <div class="chart-card"><h3 class="chart-title">⚡ 电流趋势 (μA)</h3><div class="chart-container"><canvas id="chart-current"></canvas></div></div>
                 <div class="chart-card"><h3 class="chart-title">🔌 电压趋势 (V)</h3><div class="chart-container"><canvas id="chart-voltage"></canvas></div></div>
+            </div>
+            <!-- Waveform chart — high-speed real-time view (2000Hz downsampled) -->
+            <div class="chart-card" style="margin-top:1rem">
+                <h3 class="chart-title">📈 实时波形 (电流/电压 高速采样)</h3>
+                <div class="chart-container"><canvas id="chart-waveform"></canvas></div>
             </div>
         </section>
 
@@ -168,12 +173,13 @@
       </div>
     </div>
 
-    <script src="static/js/ble_receiver.js"></script>
-    <script src="static/js/dashboard.js"></script>
-    <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('static/service-worker.js');
+        <script>
+        if (!localStorage.getItem('backend_url')) {
+            localStorage.setItem('backend_url', 'http://118.178.231.72:8080');
         }
     </script>
+    <script src="static/js/ble_receiver.js"></script>
+    <script src="static/js/dashboard.js"></script>
+    
 </body>
 </html>

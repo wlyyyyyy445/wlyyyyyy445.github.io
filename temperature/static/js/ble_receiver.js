@@ -1,100 +1,146 @@
 // Web Bluetooth BLE Receiver — 浏览器直接接收ESP32 BLE数据
-// 使用 Web Bluetooth API (Chrome/Edge/Opera 支持)
-// 与后端其他来源（模拟器/串口）数据格式一致，纳入会话系统
+// 1000Hz 批量二进制格式: [count:u8][base_ms:u32 LE][count×6B readings]
+// 每条6字节: [temp_raw:i16 LE][cur_adc:u16 LE][volt_adc:u16 LE]
 
 const NUS_SERVICE = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
 const NUS_TX = "6e400003-b5a3-f393-e0a9-e50e24dcca9e";  // Notify (ESP32 -> browser)
-const NUS_RX = "6e400002-b5a3-f393-e0a9-e50e24dcca9e";  // Write (browser -> ESP32)
 
 let bleDevice = null;
 let bleServer = null;
 let bleConnected = false;
 
-function parseBLEData(value) {
-    const text = new TextDecoder().decode(value);
-    if (!text.startsWith("DATA,")) return null;
-    const parts = text.split(",");
-    if (parts.length < 10) return null;
-    return {
-        esp_ms: parseInt(parts[1]) || 0,
-        temp_ok: parseInt(parts[2]) || 0,
-        temp_c: parts[3] !== "nan" ? parseFloat(parts[3]) : null,
-        cur_raw: parseInt(parts[4]) || 0,
-        cur_pin_v: parseFloat(parts[5]),
-        cur_ua: parseFloat(parts[6]),
-        divider_bat_v: parseFloat(parts[7]),
-        volt_raw: parseInt(parts[8]) || 0,
-        volt_pin_v: parseFloat(parts[9]),
-        voltage_v: parts.length > 10 ? parseFloat(parts[10]) : parseFloat(parts[9]),
-        source: "web_ble",
-        client_id: getClientId(),   // tag with this client's ID
-    };
+// ADC calibration (same as relay)
+const ADC_LSB_V = 2.2 / 4096.0;
+const TMP117_LSB_C = 0.0078125;
+const CURRENT_SENSE_R = 100000.0;
+const DIVIDER_SCALE = 3.0;
+
+function parseBinaryBatch(buffer) {
+    // buffer is ArrayBuffer from BLE notification
+    const data = new Uint8Array(buffer);
+    if (data.length < 5) return [];
+
+    const count = data[0];
+    if (count === 0 || count > 30) return [];
+
+    const baseMs = data[1] | (data[2] << 8) | (data[3] << 16) | (data[4] << 24);
+    const readings = [];
+    let offset = 5;
+
+    for (let i = 0; i < count; i++) {
+        if (offset + 6 > data.length) break;
+
+        // Little-endian reads from Uint8Array
+        const tempRaw = (data[offset] | (data[offset + 1] << 8)) << 16 >> 16; // i16
+        const curAdc  = data[offset + 2] | (data[offset + 3] << 8);           // u16
+        const voltAdc = data[offset + 4] | (data[offset + 5] << 8);           // u16
+        offset += 6;
+
+        const curPinV = curAdc * ADC_LSB_V;
+        const voltPinV = voltAdc * ADC_LSB_V;
+
+        readings.push({
+            esp_ms: baseMs + i,  // samples are 1ms apart
+            temp_ok: tempRaw !== 0 ? 1 : 0,
+            temp_c: parseFloat((tempRaw * TMP117_LSB_C).toFixed(2)),
+            cur_raw: curAdc,
+            cur_pin_v: parseFloat(curPinV.toFixed(6)),
+            cur_ua: parseFloat(((curPinV / CURRENT_SENSE_R) * 1000000).toFixed(3)),
+            divider_bat_v: parseFloat((curPinV * DIVIDER_SCALE).toFixed(3)),
+            volt_raw: voltAdc,
+            volt_pin_v: parseFloat(voltPinV.toFixed(6)),
+            voltage_v: parseFloat(voltPinV.toFixed(6)),
+            source: "web_ble",
+            client_id: getClientId(),
+        });
+    }
+    return readings;
 }
 
-async function postToServer(data) {
+async function postBLEBatch(readings) {
+    if (readings.length === 0) return;
     try {
-        await fetch(apiUrl('/api/data'), {
+        await fetch(getBackendUrl() + "/api/data_batch", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data),
+            body: JSON.stringify({ readings: readings }),
         });
-    } catch (e) {}
+    } catch (e) {
+        console.error("[BLE] post failed:", e);
+    }
+}
+
+function handleBLENotification(event) {
+    const readings = parseBinaryBatch(event.target.value.buffer);
+    if (readings.length === 0) return;
+    // Update dashboard with last reading
+    updateCardsFromData(readings[readings.length - 1]);
+    // Feed all to waveform
+    updateWaveform(readings);
+    // Post to backend for storage + cross-device broadcast
+    postBLEBatch(readings);
+}
+
+async function toggleBLE() {
+    if (bleConnected) {
+        await disconnectBLE();
+        return;
+    }
+    await connectBLE();
 }
 
 async function connectBLE() {
-    if (!navigator.bluetooth) {
-        alert("此浏览器不支持 Web Bluetooth。请使用 Chrome/Edge。");
-        return;
-    }
+    const btn = document.getElementById("btn-ble-connect");
+    const status = document.getElementById("ble-status");
+    btn.disabled = true;
+    status.textContent = "扫描中...";
+
     try {
         bleDevice = await navigator.bluetooth.requestDevice({
             filters: [{ services: [NUS_SERVICE] }],
             optionalServices: [NUS_SERVICE],
         });
+        status.textContent = "连接中...";
+
         bleServer = await bleDevice.gatt.connect();
         const service = await bleServer.getPrimaryService(NUS_SERVICE);
         const txChar = await service.getCharacteristic(NUS_TX);
 
         await txChar.startNotifications();
-        txChar.addEventListener("characteristicvaluechanged", (event) => {
-            const data = parseBLEData(event.target.value);
-            if (data) postToServer(data);
-        });
+        txChar.addEventListener("characteristicvaluechanged", handleBLENotification);
 
         bleConnected = true;
-        updateBLEStatus(true);
-        bleDevice.addEventListener("gattserverdisconnected", () => {
-            bleConnected = false;
-            updateBLEStatus(false);
-        });
+        btn.textContent = "🔗 BLE ✓";
+        btn.classList.add("active");
+        status.textContent = bleDevice.name || "已连接";
     } catch (e) {
-        console.error("BLE error:", e);
-        alert("BLE 连接失败: " + (e.message || e));
-        updateBLEStatus(false);
-    }
-}
-
-function updateBLEStatus(connected) {
-    const el = document.getElementById("ble-status");
-    const btn = document.getElementById("btn-ble-connect");
-    if (!el) return;
-    if (connected) {
-        el.textContent = "🔵 BLE 已连接";
-        el.style.color = "var(--success)";
-        if (btn) btn.textContent = "断开BLE";
-    } else {
-        el.textContent = "BLE 未连接";
-        el.style.color = "var(--text-muted)";
-        if (btn) btn.textContent = "🔗 连接BLE";
-    }
-}
-
-async function toggleBLE() {
-    if (bleConnected) {
-        if (bleDevice && bleDevice.gatt) bleDevice.gatt.disconnect();
+        console.error("[BLE] Connect failed:", e);
+        status.textContent = "连接失败";
         bleConnected = false;
-        updateBLEStatus(false);
-    } else {
-        await connectBLE();
     }
+    btn.disabled = false;
 }
+
+async function disconnectBLE() {
+    const btn = document.getElementById("btn-ble-connect");
+    const status = document.getElementById("ble-status");
+    try {
+        if (bleServer && bleServer.connected) {
+            await bleServer.disconnect();
+        }
+    } catch (e) {}
+    bleConnected = false;
+    bleDevice = null;
+    bleServer = null;
+    btn.textContent = "🔗 BLE";
+    btn.classList.remove("active");
+    status.textContent = "";
+}
+
+// Check BLE availability on load
+document.addEventListener("DOMContentLoaded", function () {
+    if (!navigator.bluetooth) {
+        document.getElementById("btn-ble-connect").style.display = "none";
+        document.getElementById("ble-status").textContent = "";
+    }
+});

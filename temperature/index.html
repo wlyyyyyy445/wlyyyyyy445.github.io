@@ -13,6 +13,7 @@
     <script src="static/js/lang.js"></script>
 </head>
 <body>
+    <div id="backend-banner" style="display:none;background:#EF4444;color:#fff;text-align:center;padding:8px;font-size:0.85rem"></div>
     <!-- ====== Top Bar ====== -->
     <header class="topbar">
         <div class="topbar-brand">
@@ -174,9 +175,15 @@
     </div>
 
         <script>
+        // Default backend: cloud server
         if (!localStorage.getItem('backend_url')) {
             localStorage.setItem('backend_url', 'http://118.178.231.72:8080');
         }
+        // Check backend connectivity on load
+        fetch('http://118.178.231.72:8080/api/status').catch(function() {
+            document.getElementById('backend-banner').style.display = 'block';
+            document.getElementById('backend-banner').innerHTML = '无法连接后端。请直接访问 <a href="http://118.178.231.72:8080" style="color:#fff;font-weight:bold">http://118.178.231.72:8080</a> 使用完整功能（BLE数据本地显示正常，但无法保存到数据库）';
+        });
     </script>
     <script src="static/js/ble_receiver.js"></script>
     <script src="static/js/dashboard.js"></script>

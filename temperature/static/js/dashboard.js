@@ -54,6 +54,24 @@ let sampleCountTotal = 0;
 let sampleCountWindow = 0;
 let sampleWindowStart = Date.now();
 
+// ---------- Backend connectivity banner ----------
+let _backendOk = true;
+function checkBackend() {
+    fetch(getBackendUrl() + '/api/status').then(r => {
+        if (!_backendOk) { _backendOk = true; document.getElementById('backend-banner').style.display = 'none'; }
+    }).catch(() => {
+        if (_backendOk) {
+            _backendOk = false;
+            var banner = document.getElementById('backend-banner');
+            if (banner) {
+                banner.style.display = 'block';
+                banner.innerHTML = '无法连接后端。请直接访问 <a href="http://118.178.231.72:8080" style="color:#fff;font-weight:bold">http://118.178.231.72:8080</a> 使用完整功能（BLE数据本地显示正常，但无法保存）';
+            }
+        }
+    });
+}
+setInterval(checkBackend, 10000);
+
 // ---------- WebSocket ----------
 let ws = null;
 let wsReconnectTimer = null;

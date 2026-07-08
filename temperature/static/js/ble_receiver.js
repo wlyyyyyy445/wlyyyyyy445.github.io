@@ -181,6 +181,9 @@ async function disconnectBLE() {
 
 document.addEventListener("DOMContentLoaded", function () {
     if (!navigator.bluetooth) {
-        document.getElementById("btn-ble-connect").style.display = "none";
+        // Always show BLE button — user wants it visible
+        var btn = document.getElementById("btn-ble-connect");
+        btn.style.opacity = "0.5";
+        btn.title = "浏览器不支持Web Bluetooth，请用Chrome/Edge";
     }
 });

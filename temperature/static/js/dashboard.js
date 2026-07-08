@@ -107,6 +107,8 @@ function connectWS() {
                     sampleWindowStart = now;
                     document.getElementById('sample-rate-display').textContent = sampleRateHz + ' Hz';
                 }
+            } else if (msg.type === "analysis") {
+                updateAnalysisPanel(msg);
             } else {
                 // Single reading (legacy / simulator / old relay)
                 updateCardsFromData(msg);
@@ -310,6 +312,83 @@ function createWaveformChart() {
             },
         },
     });
+}
+
+// ============================================================
+// Phase 2: Analysis Panel
+// ============================================================
+var fftChart, rChart;
+var rHistory = [];
+var _lastAnalysisUpdate = 0;
+
+function createFFTChart() {
+    var ctx = document.getElementById('chart-fft').getContext('2d');
+    return new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [
+                { label: '电压频谱', data: [], borderColor: '#F59E0B', borderWidth: 1.5, pointRadius: 0, tension: 0.1 },
+                { label: '电流频谱', data: [], borderColor: '#10B981', borderWidth: 1.5, pointRadius: 0, tension: 0.1 },
+            ],
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false, animation: false,
+            plugins: { legend: { position: 'top', labels: { boxWidth: 10, font: { size: 10 } } } },
+            scales: {
+                x: { title: { display: true, text: 'Hz', font: { size: 10 } }, ticks: { maxTicksLimit: 10, font: { size: 9 } } },
+                y: { title: { display: true, text: 'amplitude', font: { size: 10 } }, ticks: { font: { size: 9 } } },
+            },
+        },
+    });
+}
+
+function createRChart() {
+    var ctx = document.getElementById('chart-r').getContext('2d');
+    return new Chart(ctx, {
+        type: 'line',
+        data: { labels: [], datasets: [
+            { label: '内阻 R (Ω)', data: [], borderColor: '#EF4444', borderWidth: 2, pointRadius: 0, tension: 0.3 },
+        ]},
+        options: {
+            responsive: true, maintainAspectRatio: false, animation: false,
+            plugins: { legend: { position: 'top', labels: { boxWidth: 10, font: { size: 10 } } } },
+            scales: { x: { display: false }, y: { title: { display: true, text: 'Ω', font: { size: 10 } }, ticks: { font: { size: 9 } } } },
+        },
+    });
+}
+
+function updateAnalysisPanel(data) {
+    var now = Date.now();
+    if (now - _lastAnalysisUpdate < 2000) return;
+    _lastAnalysisUpdate = now;
+
+    document.getElementById('val-soc').textContent = (data.soc_uah || 0).toFixed(2) + ' µAh';
+    document.getElementById('val-r').textContent = data.r_internal != null ? (data.r_internal / 1000).toFixed(1) + ' kΩ' : '--';
+    document.getElementById('val-load').textContent = data.load_label || '--';
+    document.getElementById('val-vrms').textContent = (data.v_rms || 0).toFixed(3) + ' V';
+    document.getElementById('val-irrms').textContent = (data.i_rms || 0).toFixed(1) + ' µA';
+    document.getElementById('val-fftpeak').textContent = (data.peak_freq_v || 0).toFixed(1) + ' Hz';
+    document.getElementById('val-entropy').textContent = (data.spectral_entropy || 0).toFixed(2);
+
+    if (fftChart && data.freq_labels) {
+        fftChart.data.labels = data.freq_labels;
+        fftChart.data.datasets[0].data = data.v_spectrum || [];
+        fftChart.data.datasets[1].data = data.i_spectrum || [];
+        fftChart.update('none');
+    }
+    if (rChart && data.r_internal != null) {
+        rHistory.push(data.r_internal);
+        if (rHistory.length > 60) rHistory.shift();
+        rChart.data.labels = rHistory.map(function(_, i) { return i; });
+        rChart.data.datasets[0].data = rHistory;
+        rChart.update('none');
+    }
+}
+
+function initAnalysisCharts() {
+    if (document.getElementById('chart-fft')) fftChart = createFFTChart();
+    if (document.getElementById('chart-r')) rChart = createRChart();
 }
 
 // ---------- Tab Switching ----------
@@ -615,6 +694,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     initCharts();
+    initAnalysisCharts();
     initTabs();
     connectWS();
     scanPorts();

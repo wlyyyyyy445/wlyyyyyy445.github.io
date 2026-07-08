@@ -50,33 +50,46 @@ function parseBinaryBatch(buffer) {
 }
 
 let _backendUnreachable = false;
+let _postBuffer = [];
+let _lastCardUpdate = 0;
 
-async function postBLEBatch(readings) {
-    if (readings.length === 0) return;
-    try {
-        const resp = await fetch(getBackendUrl() + "/api/data_batch", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ readings: readings }),
-        });
-        if (_backendUnreachable) {
-            _backendUnreachable = false;
-            console.log("[BLE] Backend reachable again");
-        }
-    } catch (e) {
-        if (!_backendUnreachable) {
-            _backendUnreachable = true;
-            console.warn("[BLE] Backend unreachable — data shown locally, not saved");
-        }
-    }
+function flushPostBuffer() {
+    if (_postBuffer.length === 0) return;
+    const batch = _postBuffer.splice(0);
+    fetch(getBackendUrl() + "/api/data_batch", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ readings: batch }),
+    }).then(function() {
+        if (_backendUnreachable) { _backendUnreachable = false; }
+    }).catch(function() {
+        if (!_backendUnreachable) { _backendUnreachable = true; }
+    });
 }
+
+setInterval(flushPostBuffer, 1000);  // post to backend once per second
 
 function handleBLENotification(event) {
     const readings = parseBinaryBatch(event.target.value.buffer);
     if (readings.length === 0) return;
-    updateCardsFromData(readings[readings.length - 1]);
+
+    // Throttle DOM updates to ~4Hz
+    var now = Date.now();
+    if (now - _lastCardUpdate > 250) {
+        _lastCardUpdate = now;
+        updateCardsFromData(readings[readings.length - 1]);
+    }
     updateWaveform(readings);
-    postBLEBatch(readings);
+
+    // Buffer for backend
+    for (var i = 0; i < readings.length; i++) {
+        _postBuffer.push(readings[i]);
+    }
+    // Keep buffer from growing too large
+    if (_postBuffer.length > 100) {
+        _postBuffer = _postBuffer.slice(-100);
+    }
+}
 }
 
 function updateBLEStatus(msg) {

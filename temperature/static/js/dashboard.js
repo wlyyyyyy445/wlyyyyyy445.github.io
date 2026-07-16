@@ -39,38 +39,9 @@ function setBackendUrl(url) {
 
 // ---------- State ----------
 const MAX_POINTS = 180;
-const WAVEFORM_MAX_POINTS = 600;
-const BATCH_SLOW_CHART_INTERVAL = 20; // update slow charts every N batches (~1s)
 const tempData = { labels: [], values: [] };
 const currentData = { labels: [], values: [] };
 const voltageData = { labels: [], values: [] };
-const waveformCur = { labels: [], values: [] };
-const waveformVolt = { labels: [], values: [] };
-var _slowChartCounter = 0;
-
-// Sample rate tracking
-let sampleRateHz = 0;
-let sampleCountTotal = 0;
-let sampleCountWindow = 0;
-let sampleWindowStart = Date.now();
-
-// ---------- Backend connectivity banner ----------
-let _backendOk = true;
-function checkBackend() {
-    fetch(getBackendUrl() + '/api/status').then(r => {
-        if (!_backendOk) { _backendOk = true; document.getElementById('backend-banner').style.display = 'none'; }
-    }).catch(() => {
-        if (_backendOk) {
-            _backendOk = false;
-            var banner = document.getElementById('backend-banner');
-            if (banner) {
-                banner.style.display = 'block';
-                banner.innerHTML = '无法连接后端。请直接访问 <a href="http://118.178.231.72:8080" style="color:#fff;font-weight:bold">http://118.178.231.72:8080</a> 使用完整功能（BLE数据本地显示正常，但无法保存）';
-            }
-        }
-    });
-}
-setInterval(checkBackend, 10000);
 
 // ---------- WebSocket ----------
 let ws = null;
@@ -89,36 +60,7 @@ function connectWS() {
     };
 
     ws.onmessage = (event) => {
-        try {
-            var msg = JSON.parse(event.data);
-            if (msg.batch && Array.isArray(msg.batch)) {
-                // Batch message from 2000Hz relay
-                var count = msg.batch.length;
-                var last = msg.batch[count - 1];
-                updateCardsFromData(last);
-                updateWaveform(msg.batch);
-                // Sample rate tracking
-                sampleCountTotal += count;
-                sampleCountWindow += count;
-                var now = Date.now();
-                if (now - sampleWindowStart >= 2000) {
-                    sampleRateHz = Math.round(sampleCountWindow / ((now - sampleWindowStart) / 1000));
-                    sampleCountWindow = 0;
-                    sampleWindowStart = now;
-                    document.getElementById('sample-rate-display').textContent = sampleRateHz + ' Hz';
-                }
-            } else if (msg.type === "analysis") {
-                updateAnalysisPanel(msg);
-            } else {
-                // Single reading (legacy / simulator / old relay)
-                updateCardsFromData(msg);
-                updateWaveform([msg]);
-                if (msg.source !== 'serial_2000hz') {
-                    sampleCountTotal++;
-                    sampleCountWindow++;
-                }
-            }
-        } catch (e) {}
+        try { updateDashboard(JSON.parse(event.data)); } catch (e) {}
     };
 
     ws.onclose = () => { wsReconnectTimer = setTimeout(connectWS, 3000); };
@@ -126,74 +68,30 @@ function connectWS() {
 }
 
 // ---------- Dashboard Update ----------
-function updateCardsFromData(data) {
-    // Update the 5 info cards from a single reading
+function updateDashboard(data) {
+    // Only filter simulator data (c_ prefix = auto-generated client IDs)
+    // BLE relay and serial data pass through for all clients
+    if (data.client_id && data.client_id.startsWith('c_') && data.client_id !== getClientId()) return;
     if (data.temp_c !== null && data.temp_c !== undefined) {
         document.getElementById('val-temp').textContent = data.temp_c.toFixed(2);
         document.getElementById('status-temp').textContent = data.temp_ok ? 'TMP117 normal' : 'Sensor error';
     }
     document.getElementById('val-current').textContent = data.cur_ua != null ? data.cur_ua.toFixed(2) : '--';
-    document.getElementById('status-current').textContent = 'Divider 3x100k\\u03A9';
+    document.getElementById('status-current').textContent = 'Divider 3x100kΩ';
     document.getElementById('val-voltage').textContent = data.voltage_v != null ? data.voltage_v.toFixed(3) : '--';
     document.getElementById('status-voltage').textContent = data.volt_pin_v != null ? 'pin ' + data.volt_pin_v.toFixed(3) + 'V' : '';
     document.getElementById('val-battery').textContent = data.divider_bat_v != null ? data.divider_bat_v.toFixed(3) : '--';
-    document.getElementById('sub-battery').textContent = 'Divider 3x100k\\u03A9';
+    document.getElementById('sub-battery').textContent = 'Divider 3x100kΩ';
     if (data.esp_ms) {
         var sec = Math.floor(data.esp_ms / 1000);
         document.getElementById('val-uptime').textContent = Math.floor(sec/60) + ':' + String(sec%60).padStart(2,'0');
         document.getElementById('sub-uptime').textContent = 'ESP32-C3';
     }
-    checkThresholds(data);
-}
-
-// ---------- Waveform Update (1000Hz batch, throttled to ~30fps) ----------
-let _waveformDirty = false;
-let _waveformTimer = null;
-
-function updateWaveform(readings) {
-    if (!waveformChart || readings.length === 0) return;
-    // Append all readings to buffers (fast in-memory)
-    for (var i = 0; i < readings.length; i++) {
-        waveformCur.values.push(readings[i].cur_ua);
-        waveformVolt.values.push(readings[i].voltage_v);
-        waveformCur.labels.push(waveformCur.labels.length);
-    }
-    // Trim
-    while (waveformCur.values.length > WAVEFORM_MAX_POINTS) {
-        waveformCur.labels.shift(); waveformCur.values.shift();
-        waveformVolt.labels.shift(); waveformVolt.values.shift();
-    }
-    // Throttle chart render to ~30fps
-    _waveformDirty = true;
-    if (!_waveformTimer) {
-        _waveformTimer = setTimeout(function() {
-            _waveformTimer = null;
-            if (!_waveformDirty) return;
-            _waveformDirty = false;
-            waveformChart.data.labels = waveformCur.labels;
-            waveformChart.data.datasets[0].data = waveformCur.values;
-            waveformChart.data.datasets[1].data = waveformVolt.values;
-            waveformChart.update('none');
-        }, 33);  // ~30fps
-    }
-
-    // Update slow trend charts periodically (throttled)
-    if (_slowChartCounter++ % BATCH_SLOW_CHART_INTERVAL === 0) {
-        var last = readings[readings.length - 1];
-        var now = new Date().toLocaleTimeString();
-        addPoint(tempChart, tempData, now, last.temp_c, cfg.tempMax, cfg.tempMin);
-        addPoint(currentChart, currentData, now, last.cur_ua, cfg.currentMax, null);
-        addPoint(voltageChart, voltageData, now, last.voltage_v, cfg.voltageMax, cfg.voltageMin);
-    }
-}
-
-// Legacy single-reading handler (simulator, old relay)
-function updateDashboard(data) {
-    updateCardsFromData(data);
     var now = new Date().toLocaleTimeString();
     addPoint(tempChart, tempData, now, data.temp_c, cfg.tempMax, cfg.tempMin);
     addPoint(currentChart, currentData, now, data.cur_ua, cfg.currentMax, null);
     addPoint(voltageChart, voltageData, now, data.voltage_v, cfg.voltageMax, cfg.voltageMin);
+    checkThresholds(data);
 }
 
 // ---------- Thresholds ----------
@@ -256,139 +154,12 @@ function createChart(canvasId, color, label, maxLine, minLine) {
     });
 }
 
-var tempChart, currentChart, voltageChart, waveformChart;
+var tempChart, currentChart, voltageChart;
 
 function initCharts() {
     tempChart = createChart('chart-temp', '#3B82F6', '温度 °C', cfg.tempMax, cfg.tempMin);
     currentChart = createChart('chart-current', '#10B981', '电流 uA', cfg.currentMax, null);
     voltageChart = createChart('chart-voltage', '#F59E0B', '电压 V', cfg.voltageMax, cfg.voltageMin);
-    waveformChart = createWaveformChart();
-}
-
-function createWaveformChart() {
-    var ctx = document.getElementById('chart-waveform').getContext('2d');
-    return new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: [],
-            datasets: [
-                {
-                    label: '电流 (μA)', data: [],
-                    borderColor: '#10B981', backgroundColor: '#10B98110',
-                    borderWidth: 1.5, pointRadius: 0, tension: 0,
-                    yAxisID: 'y-cur',
-                },
-                {
-                    label: '电压 (V)', data: [],
-                    borderColor: '#F59E0B', backgroundColor: '#F59E0B10',
-                    borderWidth: 1.5, pointRadius: 0, tension: 0,
-                    yAxisID: 'y-volt',
-                },
-            ],
-        },
-        options: {
-            responsive: true, maintainAspectRatio: false,
-            animation: false,  // no animation for high-speed waveform
-            plugins: { legend: { position: 'top', labels: { boxWidth: 12, font: { size: 10 } } } },
-            scales: {
-                x: {
-                    display: true,
-                    title: { display: true, text: 'sample #', font: { size: 10 } },
-                    ticks: { maxTicksLimit: 8, font: { size: 10 }, color: '#9CA3AF' },
-                    grid: { color: '#F3F4F6' },
-                },
-                'y-cur': {
-                    type: 'linear', position: 'left',
-                    title: { display: true, text: 'μA', font: { size: 10 } },
-                    ticks: { font: { size: 10 }, color: '#10B981' },
-                    grid: { color: '#F3F4F6' },
-                },
-                'y-volt': {
-                    type: 'linear', position: 'right',
-                    title: { display: true, text: 'V', font: { size: 10 } },
-                    ticks: { font: { size: 10 }, color: '#F59E0B' },
-                    grid: { drawOnChartArea: false },
-                },
-            },
-        },
-    });
-}
-
-// ============================================================
-// Phase 2: Analysis Panel
-// ============================================================
-var fftChart, rChart;
-var rHistory = [];
-var _lastAnalysisUpdate = 0;
-
-function createFFTChart() {
-    var ctx = document.getElementById('chart-fft').getContext('2d');
-    return new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: [],
-            datasets: [
-                { label: '电压频谱', data: [], borderColor: '#F59E0B', borderWidth: 1.5, pointRadius: 0, tension: 0.1 },
-                { label: '电流频谱', data: [], borderColor: '#10B981', borderWidth: 1.5, pointRadius: 0, tension: 0.1 },
-            ],
-        },
-        options: {
-            responsive: true, maintainAspectRatio: false, animation: false,
-            plugins: { legend: { position: 'top', labels: { boxWidth: 10, font: { size: 10 } } } },
-            scales: {
-                x: { title: { display: true, text: 'Hz', font: { size: 10 } }, ticks: { maxTicksLimit: 10, font: { size: 9 } } },
-                y: { title: { display: true, text: 'amplitude', font: { size: 10 } }, ticks: { font: { size: 9 } } },
-            },
-        },
-    });
-}
-
-function createRChart() {
-    var ctx = document.getElementById('chart-r').getContext('2d');
-    return new Chart(ctx, {
-        type: 'line',
-        data: { labels: [], datasets: [
-            { label: '内阻 R (Ω)', data: [], borderColor: '#EF4444', borderWidth: 2, pointRadius: 0, tension: 0.3 },
-        ]},
-        options: {
-            responsive: true, maintainAspectRatio: false, animation: false,
-            plugins: { legend: { position: 'top', labels: { boxWidth: 10, font: { size: 10 } } } },
-            scales: { x: { display: false }, y: { title: { display: true, text: 'Ω', font: { size: 10 } }, ticks: { font: { size: 9 } } } },
-        },
-    });
-}
-
-function updateAnalysisPanel(data) {
-    var now = Date.now();
-    if (now - _lastAnalysisUpdate < 2000) return;
-    _lastAnalysisUpdate = now;
-
-    document.getElementById('val-soc').textContent = (data.soc_uah || 0).toFixed(2) + ' µAh';
-    document.getElementById('val-r').textContent = data.r_internal != null ? (data.r_internal / 1000).toFixed(1) + ' kΩ' : '--';
-    document.getElementById('val-load').textContent = data.load_label || '--';
-    document.getElementById('val-vrms').textContent = (data.v_rms || 0).toFixed(3) + ' V';
-    document.getElementById('val-irrms').textContent = (data.i_rms || 0).toFixed(1) + ' µA';
-    document.getElementById('val-fftpeak').textContent = (data.peak_freq_v || 0).toFixed(1) + ' Hz';
-    document.getElementById('val-entropy').textContent = (data.spectral_entropy || 0).toFixed(2);
-
-    if (fftChart && data.freq_labels) {
-        fftChart.data.labels = data.freq_labels;
-        fftChart.data.datasets[0].data = data.v_spectrum || [];
-        fftChart.data.datasets[1].data = data.i_spectrum || [];
-        fftChart.update('none');
-    }
-    if (rChart && data.r_internal != null) {
-        rHistory.push(data.r_internal);
-        if (rHistory.length > 60) rHistory.shift();
-        rChart.data.labels = rHistory.map(function(_, i) { return i; });
-        rChart.data.datasets[0].data = rHistory;
-        rChart.update('none');
-    }
-}
-
-function initAnalysisCharts() {
-    if (document.getElementById('chart-fft')) fftChart = createFFTChart();
-    if (document.getElementById('chart-r')) rChart = createRChart();
 }
 
 // ---------- Tab Switching ----------
@@ -603,21 +374,14 @@ function clearDashboard() {
     tempData.labels = []; tempData.values = [];
     currentData.labels = []; currentData.values = [];
     voltageData.labels = []; voltageData.values = [];
-    waveformCur.labels = []; waveformCur.values = [];
-    waveformVolt.labels = []; waveformVolt.values = [];
     if (tempChart) { tempChart.data.labels = []; tempChart.data.datasets.forEach(function(d) { d.data = []; }); tempChart.update('none'); }
     if (currentChart) { currentChart.data.labels = []; currentChart.data.datasets.forEach(function(d) { d.data = []; }); currentChart.update('none'); }
     if (voltageChart) { voltageChart.data.labels = []; voltageChart.data.datasets.forEach(function(d) { d.data = []; }); voltageChart.update('none'); }
-    if (waveformChart) { waveformChart.data.labels = []; waveformChart.data.datasets.forEach(function(d) { d.data = []; }); waveformChart.update('none'); }
     document.getElementById('val-temp').textContent = '--';
     document.getElementById('val-current').textContent = '--';
     document.getElementById('val-voltage').textContent = '--';
     document.getElementById('val-battery').textContent = '--';
     document.getElementById('val-uptime').textContent = '--';
-    document.getElementById('sample-rate-display').textContent = '';
-    sampleCountTotal = 0; sampleCountWindow = 0;
-    waveformCur.values.length = 0; waveformVolt.values.length = 0;
-    waveformCur.labels.length = 0; waveformVolt.labels.length = 0;
 }
 
 var isRecording = false;
@@ -628,23 +392,24 @@ async function toggleRecording() {
     btn.disabled = true;
     try {
         if (isRecording) {
+            // Stop everything
             await fetch(apiUrl('/api/recording/stop'), { method: 'POST' });
             await fetch(apiUrl('/api/simulator/stop'), { method: 'POST' });
             updateRecordBtn(false);
         } else {
+            // Start recording. Only start simulator if no real source connected.
+            var status = await (await fetch(apiUrl('/api/status'))).json();
+            var hasRealSource = status.connected || bleConnected;
             var dev = getDeviceInfo();
-            var source = bleConnected ? 'ble' : 'manual';
-            var resp = await fetch(apiUrl('/api/recording/start') + '&source=' + source + '&client_name=' + encodeURIComponent(dev.name) + '&device_type=' + dev.type, { method: 'POST' });
-            if (resp.ok) {
-                updateRecordBtn(true);
-            } else {
-                alert('录制启动失败: ' + resp.status);
+            var source = bleConnected ? 'ble' : (status.connected ? 'serial' : 'simulator');
+            await fetch(apiUrl('/api/recording/start') + '&source=' + source + '&client_name=' + encodeURIComponent(dev.name) + '&device_type=' + dev.type, { method: 'POST' });
+            if (!hasRealSource) {
+                // No real device - start simulator for demo data
+                await fetch(apiUrl('/api/simulator/start') + '&client_name=' + encodeURIComponent(dev.name) + '&device_type=' + dev.type, { method: 'POST' });
             }
+            updateRecordBtn(true);
         }
-    } catch(e) {
-        console.error(e);
-        alert('无法连接后端服务器。\n请检查:\n1. 后端是否运行\n2. 网络是否连通\n3. 如果是HTTPS页面, 后端也需要HTTPS');
-    }
+    } catch(e) { console.error(e); }
     btn.disabled = false;
 }
 
@@ -694,7 +459,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     initCharts();
-    initAnalysisCharts();
     initTabs();
     connectWS();
     scanPorts();
